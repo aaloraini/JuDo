@@ -8,10 +8,18 @@
 import SwiftUI
 
 @main
-struct Meal_Picker_IOSApp: App {
+struct MealPicker_IOSApp: App {
+    @StateObject private var store = RestaurantStore()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainTabView()
+                .environmentObject(store)
+                .onAppear {
+                    if store.restaurants.isEmpty {
+                        store.restaurants = store.defaultRestaurants
+                    }
+                }
         }
     }
 }
