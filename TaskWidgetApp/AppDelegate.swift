@@ -2,6 +2,7 @@
 //  AppDelegate.swift
 //  TaskWidgetApp
 //
+//  Application delegate for macOS app lifecycle management
 //  Created by Abdulhakim Aloraini on 13/12/2025.
 //
 

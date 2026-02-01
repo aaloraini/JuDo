@@ -2,6 +2,7 @@
 //  SharedTasks.swift
 //  TaskWidgetApp
 //
+//  Shared data models and thread-safe data store for app and widget
 //  Created by Abdulhakim Aloraini on 13/12/2025.
 //
 
@@ -28,7 +29,7 @@ struct TodoItem: Codable, Identifiable, Hashable, Sendable {
 // MARK: - Thread-safe Data Store
 actor DataStore {
     static let shared = DataStore()
-    
+
     private let logger = Logger(subsystem: "hkem.TaskWidgetApp", category: "DataStore")
 
     private let appGroupID = "group.com.hkem.taskwidget"
@@ -81,7 +82,7 @@ actor DataStore {
         }
 
         var (items, hideCompleted) = load()
-        
+
         // Find the highest sort order and add 1, or use 0 if no items
         let maxSortOrder = items.map { $0.sortOrder }.max() ?? 0
         let newItem = TodoItem(title: trimmedTitle, sortOrder: maxSortOrder + 1)
@@ -121,11 +122,11 @@ actor DataStore {
 
     func visibleItems() -> [TodoItem] {
         let (items, hideCompleted) = load()
-        
+
         // Handle backward compatibility: assign sort order to items that don't have one
         var sortedItems = items
         let itemsWithoutSortOrder = items.filter { $0.sortOrder == 0 }
-        
+
         // Only auto-assign sort orders if ALL items have sortOrder == 0 (indicating first-time load)
         if itemsWithoutSortOrder.count == items.count && items.count > 1 {
             // If ALL items have sortOrder = 0, reassign based on creation date
@@ -138,32 +139,32 @@ actor DataStore {
             save(items: sortedItems, hideCompleted: hideCompleted)
             logger.info("Auto-assigned sort orders to \(sortedItems.count) items")
         }
-        
+
         let sorted = sortedItems.sorted { $0.sortOrder < $1.sortOrder }
         return hideCompleted ? sorted.filter { !$0.isDone } : sorted
     }
-    
+
     // ✅ ADD THIS: reorder tasks
     func reorderTasks(from sourceIndexSet: IndexSet, to destination: Int) -> [TodoItem] {
         logger.info("Reordering tasks: from indices \(sourceIndexSet) to destination \(destination)")
-        
+
         var (items, hideCompleted) = load()
         let sortedItems = items.sorted { $0.sortOrder < $1.sortOrder }
-        
+
         var reorderedItems = Array(sortedItems)
         let itemsToMove = sourceIndexSet.map { reorderedItems[$0] }
-        
+
         // Remove items from original positions
         for index in sourceIndexSet.reversed() {
             reorderedItems.remove(at: index)
         }
-        
+
         // Insert items at new position
         let adjustedDestination = destination - sourceIndexSet.filter { $0 < destination }.count
         for (offset, item) in itemsToMove.enumerated() {
             reorderedItems.insert(item, at: adjustedDestination + offset)
         }
-        
+
         // Update sort orders
         for (index, var item) in reorderedItems.enumerated() {
             item.sortOrder = index
@@ -171,7 +172,7 @@ actor DataStore {
                 items[originalIndex] = item
             }
         }
-        
+
         save(items: items, hideCompleted: hideCompleted)
         logger.info("Reordering completed: saved \(items.count) items with new sort orders")
         return items

@@ -2,6 +2,7 @@
 //  TaskWidgetAppApp.swift
 //  TaskWidgetApp
 //
+//  Main application entry point and deep link handling
 //  Created by Abdulhakim Aloraini on 13/12/2025.
 //
 
@@ -19,7 +20,7 @@ struct TaskWidgetAppApp: App {
         .windowStyle(.titleBar)
         .windowResizability(.contentSize)
     }
-    
+
     private func handleDeepLink(_ url: URL) {
         // Handle the deep link from widget
         if url.scheme == "taskwidget" && url.host == "add" {

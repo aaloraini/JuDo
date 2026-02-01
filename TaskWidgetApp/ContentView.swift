@@ -2,6 +2,7 @@
 //  ContentView.swift
 //  TaskWidgetApp
 //
+//  Main application view for task management interface
 //  Created by Abdulhakim Aloraini on 13/12/2025.
 //
 
@@ -15,9 +16,8 @@ struct ContentView: View {
     @State private var showingEmptyStateAnimation = false
     @State private var showingAlert = false
     @State private var alertMessage = ""
-    
+
     var body: some View {
-        
         VStack(spacing: 0) {
             // Header
             VStack(alignment: .leading, spacing: 16) {
@@ -25,12 +25,12 @@ struct ContentView: View {
                     Image(systemName: "checklist")
                         .font(.title2)
                         .foregroundColor(.accentColor)
-                    
+
                     Text("Tasks")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                    
+
                     Spacer()
-                    
+
                     // Stats badge
                     if totalCount > 0 {
                         HStack(spacing: 4) {
@@ -46,18 +46,18 @@ struct ContentView: View {
                         .background(Capsule().fill(Color.green.opacity(0.1)))
                     }
                 }
-                
+
                 // Add task section
                 HStack {
                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(.accentColor)
-                    
+
                     TextField("What needs to be done?", text: $newTaskText)
                         .focused($isTextFieldFocused)
                         .textFieldStyle(.plain)
                         .font(.body)
                         .onSubmit(addTask)
-                    
+
                     Button(action: addTask) {
                         Text("Add")
                             .font(.subheadline)
@@ -76,9 +76,9 @@ struct ContentView: View {
                 )
             }
             .padding()
-            
+
             Divider()
-            
+
             // Control panel
             HStack {
                 Toggle("Hide Completed", isOn: Binding(
@@ -89,9 +89,9 @@ struct ContentView: View {
                 ))
                 .toggleStyle(.switch)
                 .controlSize(.small)
-                
+
                 Spacer()
-                
+
                 Button(action: { store.refreshWidget() }) {
                     HStack(spacing: 4) {
                         Image(systemName: "arrow.clockwise")
@@ -105,9 +105,9 @@ struct ContentView: View {
         }
             .padding(.horizontal)
             .padding(.vertical, 12)
-            
+
             Divider()
-            
+
             // Task list
             if store.visibleItems.isEmpty {
                 emptyStateView
@@ -169,16 +169,16 @@ struct ContentView: View {
             isTextFieldFocused = true
         }
     }
-    
+
     private var completedCount: Int {
         store.items.filter { $0.isDone }.count
     }
-    
+
     private var totalCount: Int {
         store.items.count
     }
-    
-    
+
+
     private var emptyStateView: some View {
         VStack(spacing: 20) {
             Image(systemName: "checklist")
@@ -186,17 +186,17 @@ struct ContentView: View {
                 .foregroundColor(.secondary.opacity(0.5))
                 .scaleEffect(showingEmptyStateAnimation ? 1.1 : 1.0)
                 .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: showingEmptyStateAnimation)
-            
+
             VStack(spacing: 8) {
                 Text("No Tasks Yet")
                     .font(.title2)
                     .fontWeight(.semibold)
-                
+
                 Text("Add your first task using the field above")
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
             }
-            
+
             Button(action: { isTextFieldFocused = true }) {
                 Label("Add a Task", systemImage: "plus.circle.fill")
             }
@@ -208,15 +208,15 @@ struct ContentView: View {
             showingEmptyStateAnimation = true
         }
     }
-    
+
     private func addTask() {
         let text = newTaskText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { 
+        guard !text.isEmpty else {
             alertMessage = "Please enter a task description"
             showingAlert = true
-            return 
+            return
         }
-        
+
         Task {
             await store.addTask(title: text) }
         newTaskText = ""
@@ -248,7 +248,7 @@ struct TaskRow: View {
                 .foregroundColor(.secondary)
                 .font(.system(size: 12))
                 .frame(width: 16, height: 16)
-            
+
             Button {
                 onToggle()
             } label: {
