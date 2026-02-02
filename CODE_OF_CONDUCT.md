@@ -148,7 +148,7 @@ This Code of Conduct is adapted from the [Contributor Covenant][homepage], versi
 ### Project Leadership
 
 - **Project Maintainer**: Abdulhakim Aloraini
-- **Email**: [Insert maintainer email]
+- **Email**: hkem.moh.ar@gmail.com
 - **GitHub**: [@aaloraini](https://github.com/aaloraini)
 
 ### Enforcement
