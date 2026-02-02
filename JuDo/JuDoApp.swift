@@ -13,5 +13,25 @@ struct JuDoApp: App {
         WindowGroup {
             ContentView()
         }
+        .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentSize)
+        .commands {
+            CommandGroup(replacing: .newItem) {
+                Button("Add Task") {
+                    NotificationCenter.default.post(name: .addTaskFromWidget, object: nil)
+                }
+                .keyboardShortcut("n", modifiers: .command)
+            }
+        }
     }
+    
+    private func handleURL(_ url: URL) {
+        if url.scheme == "judo" && url.host == "add" {
+            NotificationCenter.default.post(name: .addTaskFromWidget, object: nil)
+        }
+    }
+}
+
+extension Notification.Name {
+    static let addTaskFromWidget = Notification.Name("addTaskFromWidget")
 }
