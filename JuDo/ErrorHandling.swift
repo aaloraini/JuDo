@@ -145,13 +145,13 @@ class ErrorManager: ObservableObject {
 // MARK: - Error Handling Extensions
 
 extension TaskManager {
-    func safeAddTask(title: String) {
+    func safeAddTask(title: String, priority: Priority? = nil, dueDate: Date? = nil) {
         do {
             guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 throw JuDoError.taskCreationFailed("Task title is empty")
             }
             
-            addTask(title: title)
+            addTask(title: title, priority: priority, dueDate: dueDate)
         } catch {
             ErrorManager.shared.handle(error)
         }

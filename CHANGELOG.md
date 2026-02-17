@@ -5,7 +5,7 @@ All notable changes to JuDo will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0] - 2026-02-02
+## [2.1.4] - 2026-02-17
 
 ### Added
 - Comprehensive project documentation
@@ -34,9 +34,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Minimum Xcode version: 14.0
 - Swift 5.0+ compatibility
 - Widget timeline management with system-scheduled refreshes
-
-## [Unreleased]
-
-### TODO
-- Previous version history (pre-2.0.0)
-- Migration notes from earlier versions

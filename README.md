@@ -6,6 +6,8 @@ A minimal and elegant task management app for macOS with WidgetKit integration.
 ![Swift Version](https://img.shields.io/badge/Swift-5.0+-orange?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
+**Mac App Store**: [JuDo: ToDo Widget](https://apps.apple.com/my/app/judo-todo-widget/id6758580110?mt=12)
+
 ## Features
 
 - **Simple Task Management**: Add, complete, and delete tasks with a clean interface
@@ -38,18 +40,6 @@ Both widgets support:
 - macOS 13.0+ (Ventura)
 - Xcode 14.0+
 - Swift 5.0+
-
-## Documentation
-
-- [Installation Guide](docs/INSTALLATION.md)
-- [Building from Source](docs/BUILDING.md)
-- [Architecture Overview](docs/ARCHITECTURE.md)
-- [Widget Integration](docs/WIDGET.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
-
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
 ## License
 

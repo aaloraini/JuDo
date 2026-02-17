@@ -12,9 +12,16 @@ struct ContentView: View {
     @State private var showingAddTask = false
     @State private var newTaskTitle = ""
     @StateObject private var errorManager = ErrorManager.shared
+    @State private var showingSearch = false
+    @State private var searchQuery = ""
+    @FocusState private var searchFieldFocused: Bool
+    @State private var showingClearConfirmation = false
     
     var body: some View {
         VStack(spacing: 0) {
+            // Toolbar
+            toolbarContent
+            
             // Main content area
             taskListContent
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -23,7 +30,9 @@ struct ContentView: View {
         .sheet(isPresented: $showingAddTask) {
             AddTaskSheet(
                 taskTitle: $newTaskTitle,
-                onAdd: addTask,
+                onAdd: { priority, dueDate in
+                    addTask(priority: priority, dueDate: dueDate)
+                },
                 onCancel: { 
                     newTaskTitle = ""
                     showingAddTask = false 
@@ -32,6 +41,12 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .addTaskFromWidget)) { _ in
             showingAddTask = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .showSearch)) { _ in
+            showingSearch = true
+        }
+        .onChange(of: showingSearch) { newValue in
+            searchFieldFocused = newValue
         }
         .alert("Error", isPresented: $errorManager.showError) {
             Button("OK") {
@@ -42,28 +57,43 @@ struct ContentView: View {
                 Text(error.errorDescription ?? "An unknown error occurred")
             }
         }
+        .alert("Clear Completed Tasks", isPresented: $showingClearConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                clearCompletedTasks()
+            }
+        } message: {
+            let count = taskManager.tasks.filter { $0.isCompleted }.count
+            Text("Delete \(count) completed task\(count == 1 ? "" : "s")? This cannot be undone.")
+        }
     }
     
-    private var taskListContent: some View {
-        VStack(spacing: 0) {
-            // Task list with native styling
-            List {
-                ForEach(taskManager.filteredTasks) { task in
-                    TaskRow(task: task, taskManager: taskManager)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 2, leading: 16, bottom: 2, trailing: 16))
-                }
-                .onMove { source, destination in
-                    taskManager.safeMoveTask(from: source, to: destination)
-                }
-                .onDelete(perform: deleteTasks)
-            }
-            .listStyle(PlainListStyle())
-            .background(Color.clear)
-            .scrollContentBackground(.hidden)
+    var searchedIncompleteTasks: [Task] {
+        let incomplete = taskManager.incompleteTasks
+        guard !searchQuery.isEmpty else {
+            return incomplete
         }
-        .safeAreaInset(edge: .top) {
+        
+        return incomplete.filter { task in
+            task.title.localizedCaseInsensitiveContains(searchQuery) ||
+            (task.notes?.localizedCaseInsensitiveContains(searchQuery) ?? false)
+        }
+    }
+    
+    var searchedCompletedTasks: [Task] {
+        let completed = taskManager.completedTasks
+        guard !searchQuery.isEmpty else {
+            return completed
+        }
+        
+        return completed.filter { task in
+            task.title.localizedCaseInsensitiveContains(searchQuery) ||
+            (task.notes?.localizedCaseInsensitiveContains(searchQuery) ?? false)
+        }
+    }
+    
+    private var toolbarContent: some View {
+        VStack(spacing: 0) {
             // Native toolbar
             HStack(spacing: 16) {
                 Button(action: {
@@ -78,6 +108,78 @@ struct ContentView: View {
                 
                 Spacer()
                 
+                // Search bar
+                if showingSearch {
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.secondary)
+                            .font(.system(size: 14))
+                        
+                        TextField("Search tasks...", text: $searchQuery)
+                            .textFieldStyle(.plain)
+                            .font(.system(size: 14))
+                            .focused($searchFieldFocused)
+                            .frame(width: 200)
+                        
+                        if !searchQuery.isEmpty {
+                            Button(action: {
+                                searchQuery = ""
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 14))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        
+                        Button(action: {
+                            showingSearch = false
+                            searchQuery = ""
+                            searchFieldFocused = false
+                        }) {
+                            Text("Done")
+                                .font(.system(size: 13))
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color(NSColor.controlBackgroundColor))
+                    )
+                } else {
+                    Button(action: {
+                        showingSearch = true
+                    }) {
+                        Image(systemName: "magnifyingglass")
+                    }
+                    .buttonStyle(.bordered)
+                    .help("Search tasks")
+                }
+                
+                Menu {
+                    ForEach(TaskSortOption.allCases, id: \.self) { option in
+                        Button(action: {
+                            taskManager.sortOption = option
+                        }) {
+                            HStack {
+                                Text(option.rawValue)
+                                if taskManager.sortOption == option {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.up.arrow.down")
+                        Text(taskManager.sortOption.rawValue)
+                    }
+                }
+                .buttonStyle(.bordered)
+                .help("Sort tasks")
+                
                 Button(action: {
                     taskManager.hideCompleted.toggle()
                 }) {
@@ -85,6 +187,18 @@ struct ContentView: View {
                         .help(taskManager.hideCompleted ? "Show Completed" : "Hide Completed")
                 }
                 .buttonStyle(.bordered)
+                
+                Button(action: {
+                    let completedCount = taskManager.tasks.filter { $0.isCompleted }.count
+                    if completedCount > 0 {
+                        showingClearConfirmation = true
+                    }
+                }) {
+                    Image(systemName: "trash")
+                        .help("Clear Completed Tasks")
+                }
+                .buttonStyle(.bordered)
+                .disabled(taskManager.tasks.filter { $0.isCompleted }.isEmpty)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
@@ -100,22 +214,154 @@ struct ContentView: View {
         }
     }
     
-    private func deleteTasks(at offsets: IndexSet) {
-        for offset in offsets {
-            taskManager.safeDeleteTask(taskManager.filteredTasks[offset])
+    private var taskListContent: some View {
+        let incompleteTasks = searchedIncompleteTasks
+        let completedTasks = searchedCompletedTasks
+        let showsCompleted = !taskManager.hideCompleted && !completedTasks.isEmpty
+        let hasTasks = !incompleteTasks.isEmpty || showsCompleted
+        
+        return Group {
+            if hasTasks {
+                List {
+                    if !incompleteTasks.isEmpty {
+                        ForEach(incompleteTasks) { task in
+                            TaskRow(task: task, taskManager: taskManager)
+                                .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 16))
+                        }
+                        .onMove(perform: taskManager.sortOption == .manual && searchQuery.isEmpty ? { source, destination in
+                            moveIncompleteTasks(from: source, to: destination)
+                        } : nil)
+                        .onDelete(perform: { offsets in
+                            for offset in offsets {
+                                taskManager.safeDeleteTask(incompleteTasks[offset])
+                            }
+                        })
+                    }
+                    
+                    if !taskManager.hideCompleted && !completedTasks.isEmpty {
+                        Section(header: Text("Completed").font(.caption).foregroundColor(.secondary)) {
+                            ForEach(completedTasks) { task in
+                                TaskRow(task: task, taskManager: taskManager)
+                                    .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 16))
+                            }
+                            .onDelete(perform: { offsets in
+                                for offset in offsets {
+                                    taskManager.safeDeleteTask(completedTasks[offset])
+                                }
+                            })
+                        }
+                    }
+                }
+            } else {
+                emptyStateContent
+            }
         }
     }
+
+    private var emptyStateContent: some View {
+        let isSearching = !searchQuery.isEmpty
+        let hasCompletedTasks = !taskManager.completedTasks.isEmpty
+        let title: String
+        let message: String
+        let symbol: String
+        
+        if isSearching {
+            title = "No results"
+            message = "Try a different search or clear the filter."
+            symbol = "magnifyingglass"
+        } else if taskManager.hideCompleted && hasCompletedTasks {
+            title = "All tasks completed"
+            message = "Completed tasks are hidden."
+            symbol = "checkmark.circle"
+        } else {
+            title = "No tasks yet"
+            message = "Add your first task to get started."
+            symbol = "tray"
+        }
+        
+        return VStack(spacing: 12) {
+            Image(systemName: symbol)
+                .font(.system(size: 36))
+                .foregroundColor(.secondary)
+            
+            Text(title)
+                .font(.title3)
+                .fontWeight(.medium)
+            
+            Text(message)
+                .font(.callout)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 300)
+            
+            if isSearching {
+                Button("Clear Search") {
+                    searchQuery = ""
+                }
+                .buttonStyle(.bordered)
+            } else if taskManager.hideCompleted && hasCompletedTasks {
+                Button("Show Completed") {
+                    taskManager.hideCompleted = false
+                }
+                .buttonStyle(.bordered)
+            } else {
+                Button("Add Task") {
+                    showingAddTask = true
+                }
+                .buttonStyle(.borderedProminent)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding()
+    }
     
-    private func addTask() {
+    private func moveIncompleteTasks(from source: IndexSet, to destination: Int) {
+        let incompleteTasks = taskManager.incompleteTasks
+        
+        guard let sourceIndex = source.first,
+              sourceIndex < incompleteTasks.count else { return }
+        
+        let taskToMove = incompleteTasks[sourceIndex]
+        
+        // Find indices in the full task array
+        guard let actualSourceIndex = taskManager.tasks.firstIndex(where: { $0.id == taskToMove.id }) else { return }
+        
+        // Calculate actual destination in full array
+        var actualDestination: Int
+        if destination < incompleteTasks.count {
+            let destinationTask = incompleteTasks[destination]
+            actualDestination = taskManager.tasks.firstIndex(where: { $0.id == destinationTask.id }) ?? destination
+        } else {
+            // Moving to end of incomplete tasks
+            if let lastIncompleteTask = incompleteTasks.last {
+                actualDestination = (taskManager.tasks.firstIndex(where: { $0.id == lastIncompleteTask.id }) ?? 0) + 1
+            } else {
+                actualDestination = 0
+            }
+        }
+        
+        // Perform the move
+        taskManager.tasks.move(fromOffsets: IndexSet(integer: actualSourceIndex), toOffset: actualDestination)
+        taskManager.reorderTasks()
+        taskManager.saveTasks()
+    }
+    
+    private func addTask(priority: Priority?, dueDate: Date?) {
         let trimmedTitle = newTaskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedTitle.isEmpty else { 
             ErrorManager.shared.handle(JuDoError.taskCreationFailed("Task title cannot be empty"))
             return
         }
         
-        taskManager.safeAddTask(title: trimmedTitle)
+        taskManager.safeAddTask(title: trimmedTitle, priority: priority, dueDate: dueDate)
         newTaskTitle = ""
         showingAddTask = false
+    }
+    
+    private func clearCompletedTasks() {
+        taskManager.tasks.removeAll { $0.isCompleted }
+        taskManager.reorderTasks()
+        taskManager.saveTasks()
     }
 }
 
@@ -123,8 +369,57 @@ struct TaskRow: View {
     let task: Task
     let taskManager: TaskManager
     
+    var priorityColor: Color? {
+        guard let priority = task.priority else { return nil }
+        switch priority {
+        case .high: return .red
+        case .medium: return .orange
+        case .low: return .gray
+        }
+    }
+    
+    var dueDateText: String? {
+        guard let dueDate = task.dueDate else { return nil }
+        
+        let calendar = Calendar.current
+        let now = Date()
+        
+        if calendar.isDateInToday(dueDate) {
+            return "Today"
+        } else if calendar.isDateInTomorrow(dueDate) {
+            return "Tomorrow"
+        } else if calendar.isDateInYesterday(dueDate) {
+            return "Yesterday"
+        } else if dueDate < now {
+            // Overdue - show how many days ago
+            let days = calendar.dateComponents([.day], from: dueDate, to: now).day ?? 0
+            return "\(days)d ago"
+        } else {
+            // Future date
+            let days = calendar.dateComponents([.day], from: now, to: dueDate).day ?? 0
+            if days <= 7 {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "EEE" // Mon, Tue, etc.
+                return formatter.string(from: dueDate)
+            } else {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "MMM d" // Jan 15
+                return formatter.string(from: dueDate)
+            }
+        }
+    }
+    
     var body: some View {
         HStack(spacing: 12) {
+            // Drag handle (only visible in Manual sort mode)
+            if taskManager.sortOption == .manual {
+                Image(systemName: "line.3.horizontal")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.secondary)
+                    .frame(width: 20)
+                    .help("Drag to reorder")
+            }
+            
             Button(action: {
                 taskManager.safeToggleTaskCompletion(task)
             }) {
@@ -136,15 +431,67 @@ struct TaskRow: View {
             .buttonStyle(PlainButtonStyle())
             .frame(width: 20, height: 20)
             
+            // Priority indicator
+            if let color = priorityColor {
+                Circle()
+                    .fill(color)
+                    .frame(width: 6, height: 6)
+            }
+            
             Text(task.title)
                 .font(.system(size: 15))
                 .strikethrough(task.isCompleted)
                 .foregroundColor(task.isCompleted ? .secondary : .primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            Spacer()
+            // Due date display on the right (if exists and not showing overdue/today badge)
+            if let dateText = dueDateText, !task.isOverdue && !task.isDueToday {
+                Text(dateText)
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.secondary.opacity(0.1))
+                    )
+            }
+            
+            // Overdue/Today indicator badges
+            if task.isOverdue {
+                HStack(spacing: 4) {
+                    Image(systemName: "exclamationmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(.red)
+                    Text("Overdue")
+                        .font(.system(size: 11))
+                        .foregroundColor(.red)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.red.opacity(0.1))
+                )
+            } else if task.isDueToday {
+                HStack(spacing: 4) {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 12))
+                        .foregroundColor(.orange)
+                    Text("Today")
+                        .font(.system(size: 11))
+                        .foregroundColor(.orange)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.orange.opacity(0.1))
+                )
+            }
         }
         .padding(.vertical, 8)
+        .padding(.horizontal, 12)
         .contentShape(Rectangle())
         .background(
             RoundedRectangle(cornerRadius: 6)
@@ -155,7 +502,12 @@ struct TaskRow: View {
 
 struct AddTaskSheet: View {
     @Binding var taskTitle: String
-    let onAdd: () -> Void
+    @State private var selectedPriority: Priority? = nil
+    @State private var hasDueDate: Bool = false
+    @State private var dueDate: Date = Date()
+    @FocusState private var titleFieldFocused: Bool
+    
+    let onAdd: (Priority?, Date?) -> Void
     let onCancel: () -> Void
     
     var body: some View {
@@ -167,11 +519,42 @@ struct AddTaskSheet: View {
             TextField("New task...", text: $taskTitle)
                 .textFieldStyle(.roundedBorder)
                 .font(.system(size: 15))
+                .focused($titleFieldFocused)
                 .onSubmit {
                     if !taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        onAdd()
+                        onAdd(selectedPriority, hasDueDate ? dueDate : nil)
                     }
                 }
+                .onAppear {
+                    titleFieldFocused = true
+                }
+            
+            // Priority picker
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Priority")
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+                
+                Picker("Priority", selection: $selectedPriority) {
+                    Text("None").tag(Priority?.none)
+                    Text("🔴 High").tag(Priority?.some(.high))
+                    Text("🟠 Medium").tag(Priority?.some(.medium))
+                    Text("⚪️ Low").tag(Priority?.some(.low))
+                }
+                .pickerStyle(.segmented)
+            }
+            
+            // Due date picker
+            VStack(alignment: .leading, spacing: 8) {
+                Toggle("Set Due Date", isOn: $hasDueDate)
+                    .font(.system(size: 13))
+                
+                if hasDueDate {
+                    DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
+                        .datePickerStyle(.compact)
+                        .labelsHidden()
+                }
+            }
             
             HStack {
                 Spacer()
@@ -181,7 +564,7 @@ struct AddTaskSheet: View {
                 .keyboardShortcut(.escape)
                 
                 Button("Add") {
-                    onAdd()
+                    onAdd(selectedPriority, hasDueDate ? dueDate : nil)
                 }
                 .keyboardShortcut(.return)
                 .disabled(taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -189,7 +572,7 @@ struct AddTaskSheet: View {
             }
         }
         .padding(24)
-        .frame(width: 400)
+        .frame(width: 450)
         .background(Color(NSColor.windowBackgroundColor))
     }
 }
