@@ -9,6 +9,7 @@ import AppIntents
 import SwiftUI
 import WidgetKit
 
+@available(macOS 26.0, *)
 struct JuDoWidgetControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(
@@ -28,6 +29,7 @@ struct JuDoWidgetControl: ControlWidget {
     }
 }
 
+@available(macOS 26.0, *)
 extension JuDoWidgetControl {
     struct Provider: ControlValueProvider {
         var previewValue: Bool {

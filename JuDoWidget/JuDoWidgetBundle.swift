@@ -12,6 +12,8 @@ import SwiftUI
 struct JuDoWidgetBundle: WidgetBundle {
     var body: some Widget {
         JuDoWidget()
-        JuDoWidgetControl()
+        if #available(macOS 26.0, *) {
+            JuDoWidgetControl()
+        }
     }
 }

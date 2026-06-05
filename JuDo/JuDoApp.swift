@@ -9,8 +9,10 @@ import SwiftUI
 
 @main
 struct JuDoApp: App {
+    @Environment(\.openWindow) private var openWindow
+
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: "main") {
             ContentView()
                 .onOpenURL { url in
                     handleURL(url)
@@ -19,6 +21,13 @@ struct JuDoApp: App {
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
         .commands {
+            CommandGroup(after: .windowList) {
+                Button("Show JuDo") {
+                    openWindow(id: "main")
+                }
+                .keyboardShortcut("o", modifiers: .command)
+            }
+
             CommandGroup(replacing: .newItem) {
                 Button("Add Task") {
                     NotificationCenter.default.post(name: .addTaskFromWidget, object: nil)
