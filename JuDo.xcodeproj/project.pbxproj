@@ -1,0 +1,988 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA7861B50D32444BB06F015E /* JuDoWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EBC087292F2FBFA1001AAA0D /* JuDoWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		EBC0872C2F2FBFA1001AAA0D /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBC0872B2F2FBFA1001AAA0D /* WidgetKit.framework */; };
+		EBC0872E2F2FBFA1001AAA0D /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBC0872D2F2FBFA1001AAA0D /* SwiftUI.framework */; };
+		EBC0873B2F2FBFA2001AAA0D /* JuDoWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EBC087292F2FBFA1001AAA0D /* JuDoWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		CE4ACCD3B00F4DDE905AA344 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EBC086EF2F2FBE22001AAA0D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EBC087282F2FBFA1001AAA0D;
+			remoteInfo = JuDoWidgetExtension;
+		};
+		EBC087052F2FBE23001AAA0D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EBC086EF2F2FBE22001AAA0D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EBC086F62F2FBE22001AAA0D;
+			remoteInfo = JuDo;
+		};
+		EBC0870F2F2FBE23001AAA0D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EBC086EF2F2FBE22001AAA0D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EBC086F62F2FBE22001AAA0D;
+			remoteInfo = JuDo;
+		};
+		EBC087392F2FBFA2001AAA0D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EBC086EF2F2FBE22001AAA0D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EBC087282F2FBFA1001AAA0D;
+			remoteInfo = JuDoWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		41936590F9C9459AA3D1235A /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				AA7861B50D32444BB06F015E /* JuDoWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBC087402F2FBFA2001AAA0D /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				EBC0873B2F2FBFA2001AAA0D /* JuDoWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		10EE680A01011AC60529D082 /* JuDoiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JuDoiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EBC086F72F2FBE22001AAA0D /* JuDo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JuDo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EBC087042F2FBE23001AAA0D /* JuDoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JuDoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EBC0870E2F2FBE23001AAA0D /* JuDoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JuDoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EBC087292F2FBFA1001AAA0D /* JuDoWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = JuDoWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		EBC0872B2F2FBFA1001AAA0D /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		EBC0872D2F2FBFA1001AAA0D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		EBC087442F2FBFF0001AAA0D /* JuDoWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = JuDoWidgetExtension.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		EBC0873C2F2FBFA2001AAA0D /* Exceptions for "JuDoWidget" folder in "JuDoWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EBC087282F2FBFA1001AAA0D /* JuDoWidgetExtension */;
+		};
+		EBC087462F2FC01B001AAA0D /* Exceptions for "JuDo" folder in "JuDo" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EBC086F62F2FBE22001AAA0D /* JuDo */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		0509F40D6218FB1F49EB38C1 /* iOS */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = iOS;
+			sourceTree = "<group>";
+		};
+		9114EE58CEA13447FCABBEAA /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		EBC086F92F2FBE22001AAA0D /* JuDo */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EBC087462F2FC01B001AAA0D /* Exceptions for "JuDo" folder in "JuDo" target */,
+			);
+			path = JuDo;
+			sourceTree = "<group>";
+		};
+		EBC087072F2FBE23001AAA0D /* JuDoTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = JuDoTests;
+			sourceTree = "<group>";
+		};
+		EBC087112F2FBE23001AAA0D /* JuDoUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = JuDoUITests;
+			sourceTree = "<group>";
+		};
+		EBC0872F2F2FBFA1001AAA0D /* JuDoWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EBC0873C2F2FBFA2001AAA0D /* Exceptions for "JuDoWidget" folder in "JuDoWidgetExtension" target */,
+			);
+			path = JuDoWidget;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0D8D7BFA7DE46756262558BB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBC086F42F2FBE22001AAA0D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBC087012F2FBE23001AAA0D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBC0870B2F2FBE23001AAA0D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBC087262F2FBFA1001AAA0D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EBC0872E2F2FBFA1001AAA0D /* SwiftUI.framework in Frameworks */,
+				EBC0872C2F2FBFA1001AAA0D /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		EBC086EE2F2FBE22001AAA0D = {
+			isa = PBXGroup;
+			children = (
+				EBC087442F2FBFF0001AAA0D /* JuDoWidgetExtension.entitlements */,
+				EBC086F92F2FBE22001AAA0D /* JuDo */,
+				EBC087072F2FBE23001AAA0D /* JuDoTests */,
+				EBC087112F2FBE23001AAA0D /* JuDoUITests */,
+				EBC0872F2F2FBFA1001AAA0D /* JuDoWidget */,
+				9114EE58CEA13447FCABBEAA /* Shared */,
+				0509F40D6218FB1F49EB38C1 /* iOS */,
+				EBC0872A2F2FBFA1001AAA0D /* Frameworks */,
+				EBC086F82F2FBE22001AAA0D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EBC086F82F2FBE22001AAA0D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EBC086F72F2FBE22001AAA0D /* JuDo.app */,
+				EBC087042F2FBE23001AAA0D /* JuDoTests.xctest */,
+				EBC0870E2F2FBE23001AAA0D /* JuDoUITests.xctest */,
+				EBC087292F2FBFA1001AAA0D /* JuDoWidgetExtension.appex */,
+				10EE680A01011AC60529D082 /* JuDoiOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EBC0872A2F2FBFA1001AAA0D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EBC0872B2F2FBFA1001AAA0D /* WidgetKit.framework */,
+				EBC0872D2F2FBFA1001AAA0D /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		60977C739F471E4095957AE1 /* JuDoiOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6C196475FDAFC8CE1E267330 /* Build configuration list for PBXNativeTarget "JuDoiOS" */;
+			buildPhases = (
+				20AEC84B217AF5B9D43F3C77 /* Sources */,
+				0D8D7BFA7DE46756262558BB /* Frameworks */,
+				9226D612178F7C00132DE984 /* Resources */,
+				41936590F9C9459AA3D1235A /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AABA55234032467691BBC765 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				0509F40D6218FB1F49EB38C1 /* iOS */,
+				9114EE58CEA13447FCABBEAA /* Shared */,
+			);
+			name = JuDoiOS;
+			packageProductDependencies = (
+			);
+			productName = JuDoiOS;
+			productReference = 10EE680A01011AC60529D082 /* JuDoiOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		EBC086F62F2FBE22001AAA0D /* JuDo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EBC087182F2FBE23001AAA0D /* Build configuration list for PBXNativeTarget "JuDo" */;
+			buildPhases = (
+				EBC086F32F2FBE22001AAA0D /* Sources */,
+				EBC086F42F2FBE22001AAA0D /* Frameworks */,
+				EBC086F52F2FBE22001AAA0D /* Resources */,
+				EBC087402F2FBFA2001AAA0D /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EBC0873A2F2FBFA2001AAA0D /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				9114EE58CEA13447FCABBEAA /* Shared */,
+				EBC086F92F2FBE22001AAA0D /* JuDo */,
+			);
+			name = JuDo;
+			packageProductDependencies = (
+			);
+			productName = JuDo;
+			productReference = EBC086F72F2FBE22001AAA0D /* JuDo.app */;
+			productType = "com.apple.product-type.application";
+		};
+		EBC087032F2FBE23001AAA0D /* JuDoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EBC0871B2F2FBE23001AAA0D /* Build configuration list for PBXNativeTarget "JuDoTests" */;
+			buildPhases = (
+				EBC087002F2FBE23001AAA0D /* Sources */,
+				EBC087012F2FBE23001AAA0D /* Frameworks */,
+				EBC087022F2FBE23001AAA0D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EBC087062F2FBE23001AAA0D /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				EBC087072F2FBE23001AAA0D /* JuDoTests */,
+			);
+			name = JuDoTests;
+			packageProductDependencies = (
+			);
+			productName = JuDoTests;
+			productReference = EBC087042F2FBE23001AAA0D /* JuDoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		EBC0870D2F2FBE23001AAA0D /* JuDoUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EBC0871E2F2FBE23001AAA0D /* Build configuration list for PBXNativeTarget "JuDoUITests" */;
+			buildPhases = (
+				EBC0870A2F2FBE23001AAA0D /* Sources */,
+				EBC0870B2F2FBE23001AAA0D /* Frameworks */,
+				EBC0870C2F2FBE23001AAA0D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EBC087102F2FBE23001AAA0D /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				EBC087112F2FBE23001AAA0D /* JuDoUITests */,
+			);
+			name = JuDoUITests;
+			packageProductDependencies = (
+			);
+			productName = JuDoUITests;
+			productReference = EBC0870E2F2FBE23001AAA0D /* JuDoUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		EBC087282F2FBFA1001AAA0D /* JuDoWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EBC0873D2F2FBFA2001AAA0D /* Build configuration list for PBXNativeTarget "JuDoWidgetExtension" */;
+			buildPhases = (
+				EBC087252F2FBFA1001AAA0D /* Sources */,
+				EBC087262F2FBFA1001AAA0D /* Frameworks */,
+				EBC087272F2FBFA1001AAA0D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				9114EE58CEA13447FCABBEAA /* Shared */,
+				EBC0872F2F2FBFA1001AAA0D /* JuDoWidget */,
+			);
+			name = JuDoWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = JuDoWidgetExtension;
+			productReference = EBC087292F2FBFA1001AAA0D /* JuDoWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EBC086EF2F2FBE22001AAA0D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 2630;
+				TargetAttributes = {
+					60977C739F471E4095957AE1 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					EBC086F62F2FBE22001AAA0D = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					EBC087032F2FBE23001AAA0D = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = EBC086F62F2FBE22001AAA0D;
+					};
+					EBC0870D2F2FBE23001AAA0D = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = EBC086F62F2FBE22001AAA0D;
+					};
+					EBC087282F2FBFA1001AAA0D = {
+						CreatedOnToolsVersion = 26.2;
+					};
+				};
+			};
+			buildConfigurationList = EBC086F22F2FBE22001AAA0D /* Build configuration list for PBXProject "JuDo" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = EBC086EE2F2FBE22001AAA0D;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = EBC086F82F2FBE22001AAA0D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				EBC086F62F2FBE22001AAA0D /* JuDo */,
+				EBC087032F2FBE23001AAA0D /* JuDoTests */,
+				EBC0870D2F2FBE23001AAA0D /* JuDoUITests */,
+				EBC087282F2FBFA1001AAA0D /* JuDoWidgetExtension */,
+				60977C739F471E4095957AE1 /* JuDoiOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		9226D612178F7C00132DE984 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBC086F52F2FBE22001AAA0D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBC087022F2FBE23001AAA0D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBC0870C2F2FBE23001AAA0D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBC087272F2FBFA1001AAA0D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		20AEC84B217AF5B9D43F3C77 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBC086F32F2FBE22001AAA0D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBC087002F2FBE23001AAA0D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBC0870A2F2FBE23001AAA0D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBC087252F2FBFA1001AAA0D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AABA55234032467691BBC765 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EBC087282F2FBFA1001AAA0D /* JuDoWidgetExtension */;
+			targetProxy = CE4ACCD3B00F4DDE905AA344 /* PBXContainerItemProxy */;
+		};
+		EBC087062F2FBE23001AAA0D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EBC086F62F2FBE22001AAA0D /* JuDo */;
+			targetProxy = EBC087052F2FBE23001AAA0D /* PBXContainerItemProxy */;
+		};
+		EBC087102F2FBE23001AAA0D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EBC086F62F2FBE22001AAA0D /* JuDo */;
+			targetProxy = EBC0870F2F2FBE23001AAA0D /* PBXContainerItemProxy */;
+		};
+		EBC0873A2F2FBFA2001AAA0D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EBC087282F2FBFA1001AAA0D /* JuDoWidgetExtension */;
+			targetProxy = EBC087392F2FBFA2001AAA0D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		5A8C5DD77E23CE496E306C0A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = Icon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = iOS/JuDoiOS.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 12;
+				DEVELOPMENT_TEAM = TM3NW96WQV;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "JuDo: ToDo Widget";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = hkem.JuDo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D4CC9754542BA83DE5A3812D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = Icon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = iOS/JuDoiOS.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 12;
+				DEVELOPMENT_TEAM = TM3NW96WQV;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "JuDo: ToDo Widget";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = hkem.JuDo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		EBC087162F2FBE23001AAA0D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = TM3NW96WQV;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		EBC087172F2FBE23001AAA0D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = TM3NW96WQV;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		EBC087192F2FBE23001AAA0D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = Icon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = JuDo/JuDo.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 12;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = TM3NW96WQV;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = JuDo/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "JuDo: ToDo Widget";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 2.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = hkem.JuDo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		EBC0871A2F2FBE23001AAA0D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = Icon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = JuDo/JuDo.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 12;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = TM3NW96WQV;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = JuDo/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "JuDo: ToDo Widget";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 2.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = hkem.JuDo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		EBC0871C2F2FBE23001AAA0D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = TM3NW96WQV;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = hkem.JuDoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JuDo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/JuDo";
+			};
+			name = Debug;
+		};
+		EBC0871D2F2FBE23001AAA0D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = TM3NW96WQV;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = hkem.JuDoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JuDo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/JuDo";
+			};
+			name = Release;
+		};
+		EBC0871F2F2FBE23001AAA0D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = TM3NW96WQV;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = hkem.JuDoUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = JuDo;
+			};
+			name = Debug;
+		};
+		EBC087202F2FBE23001AAA0D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = TM3NW96WQV;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = hkem.JuDoUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = JuDo;
+			};
+			name = Release;
+		};
+		EBC0873E2F2FBFA2001AAA0D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = JuDoWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 12;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = TM3NW96WQV;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = JuDoWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = JuDoWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = hkem.JuDo.JuDoWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EBC0873F2F2FBFA2001AAA0D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = JuDoWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 12;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = TM3NW96WQV;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = JuDoWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = JuDoWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = hkem.JuDo.JuDoWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		6C196475FDAFC8CE1E267330 /* Build configuration list for PBXNativeTarget "JuDoiOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A8C5DD77E23CE496E306C0A /* Debug */,
+				D4CC9754542BA83DE5A3812D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EBC086F22F2FBE22001AAA0D /* Build configuration list for PBXProject "JuDo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EBC087162F2FBE23001AAA0D /* Debug */,
+				EBC087172F2FBE23001AAA0D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EBC087182F2FBE23001AAA0D /* Build configuration list for PBXNativeTarget "JuDo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EBC087192F2FBE23001AAA0D /* Debug */,
+				EBC0871A2F2FBE23001AAA0D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EBC0871B2F2FBE23001AAA0D /* Build configuration list for PBXNativeTarget "JuDoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EBC0871C2F2FBE23001AAA0D /* Debug */,
+				EBC0871D2F2FBE23001AAA0D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EBC0871E2F2FBE23001AAA0D /* Build configuration list for PBXNativeTarget "JuDoUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EBC0871F2F2FBE23001AAA0D /* Debug */,
+				EBC087202F2FBE23001AAA0D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EBC0873D2F2FBFA2001AAA0D /* Build configuration list for PBXNativeTarget "JuDoWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EBC0873E2F2FBFA2001AAA0D /* Debug */,
+				EBC0873F2F2FBFA2001AAA0D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = EBC086EF2F2FBE22001AAA0D /* Project object */;
+}
