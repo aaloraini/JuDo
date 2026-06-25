@@ -5,6 +5,7 @@ import WidgetKit
 import SwiftData
 import CoreData
 
+@MainActor
 class TaskManager: ObservableObject {
     @Published var tasks: [Task] = []
     @AppStorage("hideCompleted", store: UserDefaults(suiteName: "group.com.aloraini.JuDo")) var hideCompleted: Bool = false
@@ -13,7 +14,7 @@ class TaskManager: ObservableObject {
     private let modelContext: ModelContext
 
     init(container: ModelContainer) {
-        self.modelContext = ModelContext(container)
+        self.modelContext = container.mainContext
         loadTasks()
 
         NotificationCenter.default.addObserver(
@@ -26,7 +27,8 @@ class TaskManager: ObservableObject {
 
     @objc private func handleRemoteChange() {
         DispatchQueue.main.async { [weak self] in
-            self?.loadTasks()
+            guard let self else { return }
+            self.loadTasks()
             WidgetCenter.shared.reloadTimelines(ofKind: "JuDoWidget")
         }
     }
