@@ -27,16 +27,25 @@ class TaskManager: ObservableObject {
     @objc private func handleRemoteChange() {
         DispatchQueue.main.async { [weak self] in
             self?.loadTasks()
+            WidgetCenter.shared.reloadTimelines(ofKind: "JuDoWidget")
         }
     }
 
     func loadTasks() {
-        let descriptor = FetchDescriptor<Task>()
-        tasks = (try? modelContext.fetch(descriptor)) ?? []
+        do {
+            let descriptor = FetchDescriptor<Task>()
+            tasks = try modelContext.fetch(descriptor)
+        } catch {
+            print("[JuDo] Fetch failed: \(error)")
+        }
     }
 
     private func persist() {
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            print("[JuDo] Save failed: \(error)")
+        }
     }
 
     private func reloadAndNotify() {

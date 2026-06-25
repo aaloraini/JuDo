@@ -62,7 +62,7 @@ struct TaskListView: View {
                 }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { showingSync = true }) {
-                        Image(systemName: "icloud")
+                        Image(systemName: SyncManager.shared.status.symbolName)
                     }
                 }
                 ToolbarItem(placement: .navigationBarLeading) {

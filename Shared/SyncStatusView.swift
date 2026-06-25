@@ -1,14 +1,14 @@
 import SwiftUI
 
 struct SyncStatusView: View {
-    @StateObject private var syncManager = SyncManager()
+    @ObservedObject private var syncManager = SyncManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var initialSyncEnabled: Bool?
 
     var body: some View {
 #if os(macOS)
         content
-            .frame(width: 380, height: 320)
+            .frame(width: 380, height: 380)
 #else
         NavigationStack {
             content
@@ -34,6 +34,8 @@ struct SyncStatusView: View {
                 restartNotice
             }
 
+            widgetNote
+
             Spacer()
         }
         .padding(.top, 28)
@@ -47,9 +49,17 @@ struct SyncStatusView: View {
 
     private var statusSection: some View {
         VStack(spacing: 12) {
-            Image(systemName: syncManager.status.symbolName)
-                .font(.system(size: 40))
-                .foregroundStyle(statusColor)
+            ZStack {
+                Image(systemName: syncManager.status.symbolName)
+                    .font(.system(size: 40))
+                    .foregroundStyle(statusColor)
+                    .opacity(isSyncing ? 0.5 : 1.0)
+
+                if isSyncing {
+                    ProgressView()
+                        .controlSize(.small)
+                }
+            }
             Text(syncManager.status.title)
                 .font(.title3).bold()
             Text(syncManager.status.detail)
@@ -61,9 +71,17 @@ struct SyncStatusView: View {
         .padding(.horizontal, 24)
     }
 
+    private var isSyncing: Bool {
+        if case .syncing = syncManager.status { return true }
+        return false
+    }
+
     private var statusColor: Color {
         switch syncManager.status {
         case .synced:      return .green
+        case .syncing:     return .blue
+        case .error:       return .red
+        case .localOnly:   return .orange
         case .off:         return .secondary
         case .unavailable: return .orange
         }
@@ -85,6 +103,19 @@ struct SyncStatusView: View {
 #endif
         }
         .padding(.horizontal, 24)
+    }
+
+    private var widgetNote: some View {
+        Group {
+            if syncManager.isSyncEnabled {
+                Label("Changes made via the widget sync when the app is opened.", systemImage: "info.circle")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 320)
+                    .padding(.horizontal, 24)
+            }
+        }
     }
 }
 

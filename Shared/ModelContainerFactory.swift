@@ -2,6 +2,9 @@ import Foundation
 import SwiftData
 
 enum ModelContainerFactory {
+    static private(set) var isCloudKitActive: Bool = false
+    static private(set) var containerError: String?
+
     private static var sharedStoreURL: URL {
         let appGroup = FileManager.default
             .containerURL(forSecurityApplicationGroupIdentifier: "group.com.aloraini.JuDo")
@@ -14,15 +17,21 @@ enum ModelContainerFactory {
         let schema = Schema([Task.self])
         let storeURL = sharedStoreURL
 
+        isCloudKitActive = false
+        containerError = nil
+
         guard isCloudKitSyncEnabled else {
             let config = ModelConfiguration(schema: schema, url: storeURL)
             return try ModelContainer(for: schema, configurations: config)
         }
 
         do {
-            return try makeCloudKitContainer(schema: schema, storeURL: storeURL)
+            let container = try makeCloudKitContainer(schema: schema, storeURL: storeURL)
+            isCloudKitActive = true
+            return container
         } catch {
             print("[JuDo] CloudKit container failed, falling back to local: \(error)")
+            containerError = error.localizedDescription
             let config = ModelConfiguration(schema: schema, url: storeURL)
             return try ModelContainer(for: schema, configurations: config)
         }

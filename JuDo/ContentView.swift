@@ -179,7 +179,7 @@ struct ContentView: View {
                 .disabled(taskManager.tasks.filter { $0.isCompleted }.isEmpty)
 
                 Button(action: { showingSync = true }) {
-                    Image(systemName: "icloud").help("iCloud Sync")
+                    Image(systemName: SyncManager.shared.status.symbolName).help("iCloud Sync")
                 }
                 .buttonStyle(.bordered)
 
@@ -290,27 +290,7 @@ struct ContentView: View {
     }
 
     private func moveIncompleteTasks(from source: IndexSet, to destination: Int) {
-        let incomplete = taskManager.incompleteTasks
-        guard let sourceIndex = source.first, sourceIndex < incomplete.count else { return }
-
-        let taskToMove = incomplete[sourceIndex]
-        guard let actualSource = taskManager.tasks.firstIndex(where: { $0.id == taskToMove.id }) else { return }
-
-        let actualDestination: Int
-        if destination < incomplete.count {
-            let destTask = incomplete[destination]
-            actualDestination = taskManager.tasks.firstIndex(where: { $0.id == destTask.id }) ?? destination
-        } else {
-            if let last = incomplete.last {
-                actualDestination = (taskManager.tasks.firstIndex(where: { $0.id == last.id }) ?? 0) + 1
-            } else {
-                actualDestination = 0
-            }
-        }
-
-        taskManager.tasks.move(fromOffsets: IndexSet(integer: actualSource), toOffset: actualDestination)
-        taskManager.reorderTasks()
-        taskManager.saveTasks()
+        taskManager.moveTask(from: source, to: destination)
     }
 
     private func addTask(priority: Priority?, dueDate: Date?) {
