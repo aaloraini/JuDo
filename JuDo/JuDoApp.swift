@@ -23,12 +23,21 @@ struct JuDoApp: App {
         }
     }
 
+    @Environment(\.scenePhase) private var scenePhase
+
     var body: some Scene {
         WindowGroup(id: "main") {
             ContentView(container: container)
                 .onOpenURL { url in
                     handleURL(url)
                 }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                _Concurrency.Task {
+                    await SyncManager.shared.refreshAccountStatus()
+                }
+            }
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)

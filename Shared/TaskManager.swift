@@ -42,76 +42,86 @@ class TaskManager: ObservableObject {
         }
     }
 
-    private func persist() {
+    private func save() {
         do {
             try modelContext.save()
         } catch {
             print("[JuDo] Save failed: \(error)")
         }
-    }
-
-    private func reloadAndNotify() {
-        persist()
         loadTasks()
         WidgetCenter.shared.reloadTimelines(ofKind: "JuDoWidget")
-    }
-
-    // Kept for compatibility with ContentView and ErrorHandling
-    func saveTasks() {
-        reloadAndNotify()
     }
 
     func addTask(title: String, priority: Priority? = nil, dueDate: Date? = nil) {
         let newTask = Task(title: title, order: tasks.count, priority: priority, dueDate: dueDate)
         modelContext.insert(newTask)
-        reloadAndNotify()
+        save()
     }
 
     func deleteTask(_ task: Task) {
+        let deletedOrder = task.order
         modelContext.delete(task)
-        persist()
-        loadTasks()
-        reorderTasks()
-        reloadAndNotify()
+        save()
+        // Only shift tasks that were after the deleted one
+        for t in tasks where t.order > deletedOrder {
+            t.order -= 1
+        }
+        save()
     }
 
     func toggleTaskCompletion(_ task: Task) {
         task.isCompleted.toggle()
         task.updatedAt = Date()
         task.completedAt = task.isCompleted ? Date() : nil
-        reloadAndNotify()
+        save()
     }
 
     func moveTask(from source: IndexSet, to destination: Int) {
         let incomplete = incompleteTasks
         guard let sourceIdx = source.first, sourceIdx < incomplete.count else { return }
         let taskToMove = incomplete[sourceIdx]
-        guard let actualSource = tasks.firstIndex(where: { $0.id == taskToMove.id }) else { return }
-        let actualDest: Int
-        if destination < incomplete.count {
-            actualDest = tasks.firstIndex(where: { $0.id == incomplete[destination].id }) ?? destination
-        } else if let last = incomplete.last {
-            actualDest = (tasks.firstIndex(where: { $0.id == last.id }) ?? 0) + 1
-        } else {
-            actualDest = 0
-        }
-        tasks.move(fromOffsets: IndexSet(integer: actualSource), toOffset: actualDest)
-        reorderTasks()
-        saveTasks()
-    }
+        let oldOrder = taskToMove.order
 
-    func reorderTasks() {
-        for (index, task) in tasks.enumerated() {
-            task.order = index
+        // Calculate the new order based on neighbors in the incomplete list
+        let newOrder: Int
+        if destination <= 0 {
+            newOrder = (incomplete.first?.order ?? 0) - 1
+        } else if destination >= incomplete.count {
+            newOrder = (incomplete.last?.order ?? 0) + 1
+        } else {
+            let target = incomplete[destination]
+            newOrder = target.order
         }
+
+        if oldOrder < newOrder {
+            for t in tasks where t.order > oldOrder && t.order <= newOrder {
+                t.order -= 1
+            }
+        } else if oldOrder > newOrder {
+            for t in tasks where t.order >= newOrder && t.order < oldOrder {
+                t.order += 1
+            }
+        }
+        taskToMove.order = newOrder
+        taskToMove.updatedAt = Date()
+        save()
     }
 
     func clearCompletedTasks() {
-        tasks.filter { $0.isCompleted }.forEach { modelContext.delete($0) }
-        persist()
-        loadTasks()
-        reorderTasks()
-        reloadAndNotify()
+        let completed = tasks.filter { $0.isCompleted }
+        completed.forEach { modelContext.delete($0) }
+        save()
+        // Compact remaining order values
+        let sorted = tasks.sorted { $0.order < $1.order }
+        for (index, task) in sorted.enumerated() where task.order != index {
+            task.order = index
+        }
+        if modelContext.hasChanges { save() }
+    }
+
+    // Kept for compatibility with ContentView and ErrorHandling
+    func saveTasks() {
+        save()
     }
 
     // MARK: - Computed views

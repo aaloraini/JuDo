@@ -21,9 +21,18 @@ struct JuDoiOSApp: App {
         }
     }
 
+    @Environment(\.scenePhase) private var scenePhase
+
     var body: some Scene {
         WindowGroup {
             TaskListView(container: container)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                _Concurrency.Task {
+                    await SyncManager.shared.refreshAccountStatus()
+                }
+            }
         }
     }
 }
