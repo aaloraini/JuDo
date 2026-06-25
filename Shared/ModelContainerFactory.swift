@@ -14,14 +14,18 @@ enum ModelContainerFactory {
         let schema = Schema([Task.self])
         let storeURL = sharedStoreURL
 
-        // Try with CloudKit first, unless the user turned sync off
-        if isCloudKitSyncEnabled, let container = try? makeCloudKitContainer(schema: schema, storeURL: storeURL) {
-            return container
+        guard isCloudKitSyncEnabled else {
+            let config = ModelConfiguration(schema: schema, url: storeURL)
+            return try ModelContainer(for: schema, configurations: config)
         }
 
-        // Sync disabled, or CloudKit unavailable (iCloud not signed in, schema not deployed, etc.) — use local store
-        let config = ModelConfiguration(schema: schema, url: storeURL)
-        return try ModelContainer(for: schema, configurations: config)
+        do {
+            return try makeCloudKitContainer(schema: schema, storeURL: storeURL)
+        } catch {
+            print("[JuDo] CloudKit container failed, falling back to local: \(error)")
+            let config = ModelConfiguration(schema: schema, url: storeURL)
+            return try ModelContainer(for: schema, configurations: config)
+        }
     }
 
     private static var isCloudKitSyncEnabled: Bool {
