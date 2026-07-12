@@ -65,6 +65,7 @@ final class LeaderboardManager: ObservableObject {
     }
 
     func addMon(_ amount: Int) async throws {
+        if userRecordID == nil { await fetchUser() }
         guard let userRecordID else { throw LBError.notSignedIn }
         let record = await fetchOrNew(id: supporterID(for: userRecordID))
         let current = record["totalMon"] as? Int ?? 0

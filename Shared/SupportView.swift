@@ -3,11 +3,19 @@ import StoreKit
 import Combine
 
 struct SupportView: View {
-    @StateObject private var store = StoreManager()
-    @StateObject private var leaderboard = LeaderboardManager()
+    @StateObject private var store: StoreManager
+    @StateObject private var leaderboard: LeaderboardManager
     @State private var showingNameSheet = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
+
+    init() {
+        let leaderboard = LeaderboardManager()
+        _leaderboard = StateObject(wrappedValue: leaderboard)
+        _store = StateObject(wrappedValue: StoreManager { amount in
+            try await leaderboard.addMon(amount)
+        })
+    }
 
     private var monIcon: String { colorScheme == .dark ? "Mon_Dark" : "Mon_Light" }
 
@@ -95,6 +103,7 @@ struct SupportView: View {
         .task {
             await store.loadProducts()
             await leaderboard.setup()
+            await store.recoverUnfinished()
         }
     }
 
@@ -162,7 +171,7 @@ struct SupportView: View {
             } else {
                 VStack(spacing: 10) {
                     ForEach(store.products, id: \.id) { product in
-                        TierCard(product: product, store: store, leaderboard: leaderboard, monIcon: monIcon)
+                        TierCard(product: product, store: store, monIcon: monIcon)
                     }
                 }
             }
@@ -228,7 +237,6 @@ struct SupportView: View {
 private struct TierCard: View {
     let product: Product
     let store: StoreManager
-    let leaderboard: LeaderboardManager
     let monIcon: String
 
     private var tier: MonTier? { MonTier.all.first(where: { $0.id == product.id }) }
@@ -247,9 +255,6 @@ private struct TierCard: View {
 
             Button(product.displayPrice) {
                 _Concurrency.Task {
-                    store.onPurchaseComplete = { amount in
-                        try? await leaderboard.addMon(amount)
-                    }
                     await store.purchase(product)
                 }
             }

@@ -8,15 +8,15 @@ final class StoreManager: ObservableObject {
     @Published var isPurchasing = false
     @Published var purchaseError: String?
 
-    var onPurchaseComplete: ((Int) async -> Void)?
+    private let credit: (Int) async throws -> Void
+    private var creditedTransactionIDs = Set<UInt64>()
+    private var transactionListener: _Concurrency.Task<Void, Never>?
 
-    private var transactionListener: _Concurrency.Task<Void, Error>?
-
-    init() {
-        transactionListener = _Concurrency.Task.detached {
+    init(credit: @escaping (Int) async throws -> Void) {
+        self.credit = credit
+        transactionListener = _Concurrency.Task.detached { [weak self] in
             for await result in Transaction.updates {
-                guard case .verified(let tx) = result else { continue }
-                await tx.finish()
+                await self?.handle(result)
             }
         }
     }
@@ -32,6 +32,14 @@ final class StoreManager: ObservableObject {
         }
     }
 
+    /// Credits purchases that were paid for but never delivered, e.g. because
+    /// the app quit mid-purchase or the leaderboard save failed.
+    func recoverUnfinished() async {
+        for await result in Transaction.unfinished {
+            await handle(result)
+        }
+    }
+
     func purchase(_ product: Product) async {
         isPurchasing = true
         purchaseError = nil
@@ -40,19 +48,34 @@ final class StoreManager: ObservableObject {
             let result = try await product.purchase()
             switch result {
             case .success(let verification):
-                guard case .verified(let tx) = verification else {
-                    purchaseError = "Purchase could not be verified"
-                    return
-                }
-                let amount = MonTier.all.first(where: { $0.id == product.id })?.monAmount ?? 1
-                await onPurchaseComplete?(amount)
-                await tx.finish()
+                await handle(verification)
             case .pending, .userCancelled:
                 break
             @unknown default:
                 break
             }
         } catch {
+            purchaseError = error.localizedDescription
+        }
+    }
+
+    /// Finishing a consumable tells StoreKit the content was delivered, so the
+    /// transaction is only finished after the credit succeeds. On failure it is
+    /// left unfinished and StoreKit redelivers it (see `recoverUnfinished`).
+    private func handle(_ result: VerificationResult<Transaction>) async {
+        guard case .verified(let tx) = result else {
+            purchaseError = "Purchase could not be verified"
+            return
+        }
+        guard !creditedTransactionIDs.contains(tx.id) else { return }
+        creditedTransactionIDs.insert(tx.id)
+
+        let amount = MonTier.all.first(where: { $0.id == tx.productID })?.monAmount ?? 1
+        do {
+            try await credit(amount)
+            await tx.finish()
+        } catch {
+            creditedTransactionIDs.remove(tx.id)
             purchaseError = error.localizedDescription
         }
     }
