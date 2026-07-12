@@ -5,6 +5,25 @@ All notable changes to JuDo will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.2] - 2026-07-11
+
+### Fixed
+- Mon purchases are no longer lost if saving to the leaderboard fails: the transaction now stays pending and is retried automatically the next time the Support page opens
+- Purchases completing in the background (interrupted purchases, Ask to Buy approvals) now credit Mon correctly instead of being silently discarded
+- Purchase errors are now shown on the Support page instead of failing silently
+- Joining the leaderboard no longer fails when the iCloud account info hasn't loaded yet
+
+## [2.2.1] - 2026-06-25
+
+### Fixed
+- iCloud sync no longer reverts recent changes when CloudKit pushes arrive
+- Sync recovers gracefully from an incompatible local store by auto-resetting it
+- iOS sync fixed with push notification entitlement and improved CloudKit error logging
+- Live sync status monitoring with better error handling; iOS data migration added
+
+### Changed
+- Sync optimized: single save per mutation, smarter reordering, foreground status refresh
+
 ## [2.2.0] - 2026-06-16
 
 ### Added
