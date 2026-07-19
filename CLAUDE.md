@@ -43,7 +43,7 @@ Only the `JuDo` scheme is shared (`.xcscheme` file exists). The `JuDoiOS` scheme
 
 ### Directory layout
 
-- **`Shared/`** - Code used by both macOS and iOS targets: data model (`Task.swift`), `TaskManager`, `ModelContainerFactory`, `SyncManager`, `StoreManager`, `LeaderboardManager`, `SupportView`, `SyncStatusView`, enums (`Priority`, `TaskSortOption`, `MonTier`)
+- **`Shared/`** - Code used by both macOS and iOS targets: data model (`Task.swift`), `TaskManager`, `TaskCompletion`, `ModelContainerFactory`, `SyncManager`, `StoreManager`, `LeaderboardManager`, `SupportView`, `SyncStatusView`, enums (`Priority`, `TaskSortOption`, `MonTier`)
 - **`JuDo/`** - macOS-only: `ContentView.swift` (main UI), `DataMigration.swift`, `ErrorHandling.swift`
 - **`iOS/`** - iOS-only: `TaskListView.swift`, `AddTaskView.swift`, `TaskDetailView.swift`, `TaskRowView.swift`
 - **`JuDoWidget/`** - Widget extension: timeline provider, widget views, `AppIntent` actions
@@ -53,6 +53,8 @@ Only the `JuDo` scheme is shared (`.xcscheme` file exists). The `JuDoiOS` scheme
 `Task` is a `@Model` (SwiftData). `ModelContainerFactory.make()` creates the container at app launch, choosing between CloudKit-backed or local-only based on the `iCloudSyncEnabled` UserDefaults flag. The container is injected into `TaskManager` (an `ObservableObject` that owns a `ModelContext` and publishes task arrays). Both platform entry points (`JuDoApp`, `JuDoiOSApp`) create the container and pass it down.
 
 The widget uses `ModelContainerFactory.makeWidget()` which is always local-only (no CloudKit overhead). It reads/writes the same SQLite file in the App Group container.
+
+Tasks support one level of hierarchy via `Task.parentId` (a plain `UUID?`, not a SwiftData relationship, for CloudKit compatibility). `TaskManager.topLevelTasks` is orphan-tolerant: a child whose parent record hasn't synced yet shows as top-level until the parent arrives. `TaskCompletion` (in `Shared/`) holds the master/subtask completion semantics (toggling a master drives its children; completing the last child auto-completes the master) and is used by both `TaskManager` and the widget's `ToggleTaskIntent` so all entry points behave identically.
 
 ### CloudKit / iCloud sync
 

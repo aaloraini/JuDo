@@ -14,6 +14,7 @@ final class Task {
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
     var completedAt: Date? = nil
+    var parentId: UUID? = nil
 
     // Computed wrapper — not stored, not synced to CloudKit
     var priority: Priority? {
@@ -26,7 +27,8 @@ final class Task {
         order: Int,
         priority: Priority? = nil,
         dueDate: Date? = nil,
-        notes: String? = nil
+        notes: String? = nil,
+        parentId: UUID? = nil
     ) {
         self.id = UUID()
         self.title = title
@@ -38,6 +40,7 @@ final class Task {
         self.createdAt = Date()
         self.updatedAt = Date()
         self.completedAt = nil
+        self.parentId = parentId
     }
 
     var isOverdue: Bool {

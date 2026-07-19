@@ -10,6 +10,8 @@ struct TaskListView: View {
     @State private var editMode: EditMode = .inactive
     @State private var showingSupport = false
     @State private var showingSync = false
+    @State private var expandedTasks: Set<UUID> = []
+    @State private var taskPendingDelete: Task? = nil
 
     init(container: ModelContainer) {
         _taskManager = StateObject(wrappedValue: TaskManager(container: container))
@@ -17,18 +19,12 @@ struct TaskListView: View {
 
     var searchedIncompleteTasks: [Task] {
         guard !searchQuery.isEmpty else { return taskManager.incompleteTasks }
-        return taskManager.incompleteTasks.filter {
-            $0.title.localizedCaseInsensitiveContains(searchQuery) ||
-            ($0.notes?.localizedCaseInsensitiveContains(searchQuery) ?? false)
-        }
+        return taskManager.incompleteTasks.filter { taskManager.matches($0, query: searchQuery) }
     }
 
     var searchedCompletedTasks: [Task] {
         guard !searchQuery.isEmpty else { return taskManager.completedTasks }
-        return taskManager.completedTasks.filter {
-            $0.title.localizedCaseInsensitiveContains(searchQuery) ||
-            ($0.notes?.localizedCaseInsensitiveContains(searchQuery) ?? false)
-        }
+        return taskManager.completedTasks.filter { taskManager.matches($0, query: searchQuery) }
     }
 
     var body: some View {
@@ -82,7 +78,7 @@ struct TaskListView: View {
                                 systemImage: taskManager.hideCompleted ? "eye" : "eye.slash"
                             )
                         }
-                        if taskManager.tasks.contains(where: { $0.isCompleted }) {
+                        if !taskManager.completedTasks.isEmpty {
                             Button(role: .destructive, action: { showingClearConfirmation = true }) {
                                 Label("Clear Completed", systemImage: "trash")
                             }
@@ -110,8 +106,26 @@ struct TaskListView: View {
                     taskManager.clearCompletedTasks()
                 }
             } message: {
-                let count = taskManager.tasks.filter { $0.isCompleted }.count
-                Text("Delete \(count) completed task\(count == 1 ? "" : "s")? This cannot be undone.")
+                let completed = taskManager.completedTasks
+                let hasChildren = completed.contains { taskManager.hasSubtasks($0) }
+                Text("Delete \(completed.count) completed task\(completed.count == 1 ? "" : "s")\(hasChildren ? " and their subtasks" : "")? This cannot be undone.")
+            }
+            .confirmationDialog(
+                "Delete Task",
+                isPresented: Binding(
+                    get: { taskPendingDelete != nil },
+                    set: { if !$0 { taskPendingDelete = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: taskPendingDelete
+            ) { task in
+                Button("Delete", role: .destructive) {
+                    taskManager.deleteTask(task)
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: { task in
+                let count = taskManager.subtasks(of: task).count
+                Text("\"\(task.title)\" has \(count) subtask\(count == 1 ? "" : "s") that will also be deleted.")
             }
         }
     }
@@ -124,9 +138,7 @@ struct TaskListView: View {
             if !incomplete.isEmpty {
                 Section {
                     ForEach(incomplete) { task in
-                        TaskRowView(task: task, taskManager: taskManager)
-                            .contentShape(Rectangle())
-                            .onTapGesture { selectedTask = task }
+                        taskRowGroup(for: task)
                     }
                     .onMove { source, destination in
                         if taskManager.sortOption == .manual {
@@ -134,7 +146,7 @@ struct TaskListView: View {
                         }
                     }
                     .onDelete { offsets in
-                        offsets.forEach { taskManager.deleteTask(incomplete[$0]) }
+                        offsets.forEach { requestDelete(incomplete[$0]) }
                     }
                 }
             }
@@ -142,12 +154,10 @@ struct TaskListView: View {
             if !taskManager.hideCompleted && !completed.isEmpty {
                 Section("Completed") {
                     ForEach(completed) { task in
-                        TaskRowView(task: task, taskManager: taskManager)
-                            .contentShape(Rectangle())
-                            .onTapGesture { selectedTask = task }
+                        taskRowGroup(for: task)
                     }
                     .onDelete { offsets in
-                        offsets.forEach { taskManager.deleteTask(completed[$0]) }
+                        offsets.forEach { requestDelete(completed[$0]) }
                     }
                 }
             }
@@ -156,6 +166,76 @@ struct TaskListView: View {
         .environment(\.editMode, $editMode)
         .onChange(of: taskManager.sortOption) { _, newValue in
             if newValue != .manual { editMode = .inactive }
+        }
+    }
+
+    @ViewBuilder
+    private func taskRowGroup(for task: Task) -> some View {
+        if taskManager.hasSubtasks(task) || expandedTasks.contains(task.id) {
+            DisclosureGroup(isExpanded: expansionBinding(for: task)) {
+                let children = taskManager.subtasks(of: task)
+                ForEach(children) { subtask in
+                    TaskRowView(task: subtask, taskManager: taskManager)
+                        .contentShape(Rectangle())
+                        .onTapGesture { selectedTask = subtask }
+                        .contextMenu {
+                            Button { selectedTask = subtask } label: {
+                                Label("Edit", systemImage: "pencil")
+                            }
+                            Button(role: .destructive) { requestDelete(subtask) } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                }
+                .onMove { source, destination in
+                    taskManager.moveSubtask(of: task, from: source, to: destination)
+                }
+                .onDelete { offsets in
+                    offsets.forEach { requestDelete(children[$0]) }
+                }
+                AddSubtaskField { title in
+                    taskManager.addSubtask(to: task, title: title)
+                }
+            } label: {
+                taskRowLabel(for: task)
+            }
+        } else {
+            taskRowLabel(for: task)
+        }
+    }
+
+    private func taskRowLabel(for task: Task) -> some View {
+        TaskRowView(task: task, taskManager: taskManager)
+            .contentShape(Rectangle())
+            .onTapGesture { selectedTask = task }
+            .contextMenu {
+                Button { selectedTask = task } label: {
+                    Label("Edit", systemImage: "pencil")
+                }
+                Button(role: .destructive) { requestDelete(task) } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
+    }
+
+    private func expansionBinding(for task: Task) -> Binding<Bool> {
+        Binding(
+            get: { expandedTasks.contains(task.id) },
+            set: { isExpanded in
+                if isExpanded {
+                    expandedTasks.insert(task.id)
+                } else {
+                    expandedTasks.remove(task.id)
+                }
+            }
+        )
+    }
+
+    private func requestDelete(_ task: Task) {
+        if taskManager.hasSubtasks(task) {
+            taskPendingDelete = task
+        } else {
+            taskManager.deleteTask(task)
         }
     }
 
@@ -174,5 +254,28 @@ struct TaskListView: View {
                 .buttonStyle(.borderedProminent)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+// MARK: - AddSubtaskField
+
+struct AddSubtaskField: View {
+    @State private var title = ""
+    let onSubmit: (String) -> Void
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "plus.circle")
+                .font(.system(size: 20))
+                .foregroundStyle(.secondary)
+
+            TextField("Add subtask", text: $title)
+                .onSubmit {
+                    let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !trimmed.isEmpty else { return }
+                    onSubmit(trimmed)
+                    title = ""
+                }
+        }
     }
 }

@@ -12,6 +12,7 @@ A minimal and elegant task management app for macOS and iOS with WidgetKit integ
 ## Features
 
 - **Simple Task Management**: Add, complete, and delete tasks with a clean interface
+- **Subtasks**: Break any task into subtasks with a progress counter; completing the last subtask completes the parent
 - **iCloud Sync**: Tasks sync automatically between macOS and iOS via CloudKit, with a sync status button so you can always confirm your tasks are backed up
 - **Sync Control**: Toggle iCloud sync on or off at any time from the sync status sheet
 - **Drag & Drop Reordering**: Organize tasks by dragging them to new positions

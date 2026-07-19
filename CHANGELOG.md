@@ -5,6 +5,27 @@ All notable changes to JuDo will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.3] - 2026-07-19
+
+### Added
+- Subtasks: any task can be a parent task with its own list of subtasks
+- Create a parent task with subtasks directly from the Add flow, or add subtasks later from the task list or detail view
+- Expandable subtask lists in the main list with inline add, reorder, and delete
+- Progress counter (e.g. 3/5) on parent task rows in the app and widgets
+- Completing a parent completes all its subtasks; completing the last subtask auto-completes the parent, in the app and from widget toggles alike
+- Search matches subtask titles, surfacing the parent task
+- Edit sheet on macOS to change a task's title, priority, due date, and subtasks
+- Delete confirmations warn when a task's subtasks will also be deleted
+
+### Fixed
+- Store schema migration now runs reliably before CloudKit opens the store, preventing "no such column" fetch failures after an update
+- Widget data container is now truly local-only; it previously enabled CloudKit silently via the widget's entitlements
+
+### Technical
+- New `Task.parentId` field (one level of hierarchy, synced via CloudKit)
+- New `Shared/TaskCompletion.swift` holds master/subtask completion semantics shared by the app and widget AppIntents
+- CloudKit schema must be deployed to Production before this build ships to the App Store
+
 ## [2.2.2] - 2026-07-11
 
 ### Fixed

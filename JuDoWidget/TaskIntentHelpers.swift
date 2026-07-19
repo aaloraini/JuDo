@@ -13,6 +13,11 @@ enum TaskIntentHelpers {
         return try context.fetch(descriptor).first
     }
 
+    static func findChildren(of parentId: UUID, in context: ModelContext) throws -> [Task] {
+        let descriptor = FetchDescriptor<Task>(predicate: #Predicate { $0.parentId == parentId })
+        return try context.fetch(descriptor)
+    }
+
     static func reloadWidget() {
         WidgetCenter.shared.reloadTimelines(ofKind: "JuDoWidget")
     }

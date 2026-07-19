@@ -2,7 +2,7 @@ import SwiftUI
 
 struct TaskDetailView: View {
     let task: Task
-    let taskManager: TaskManager
+    @ObservedObject var taskManager: TaskManager
     @Environment(\.dismiss) private var dismiss
 
     @State private var title: String
@@ -52,6 +52,38 @@ struct TaskDetailView: View {
                         .frame(minHeight: 100)
                 }
 
+                if task.parentId == nil {
+                    Section("Subtasks") {
+                        let children = taskManager.subtasks(of: task)
+                        ForEach(children) { subtask in
+                            HStack(spacing: 12) {
+                                Button(action: { taskManager.toggleTaskCompletion(subtask) }) {
+                                    Image(systemName: subtask.isCompleted ? "checkmark.circle.fill" : "circle")
+                                        .font(.system(size: 22))
+                                        .foregroundStyle(subtask.isCompleted ? Color.accentColor : .secondary)
+                                        .symbolRenderingMode(.hierarchical)
+                                }
+                                .buttonStyle(.plain)
+
+                                Text(subtask.title)
+                                    .strikethrough(subtask.isCompleted)
+                                    .foregroundStyle(subtask.isCompleted ? .secondary : .primary)
+                            }
+                        }
+                        .onMove { source, destination in
+                            taskManager.moveSubtask(of: task, from: source, to: destination)
+                        }
+                        .onDelete { offsets in
+                            let children = taskManager.subtasks(of: task)
+                            offsets.forEach { taskManager.deleteTask(children[$0]) }
+                        }
+
+                        AddSubtaskField { title in
+                            taskManager.addSubtask(to: task, title: title)
+                        }
+                    }
+                }
+
                 Section {
                     Button(role: .destructive, action: { showingDeleteConfirmation = true }) {
                         Label("Delete Task", systemImage: "trash")
@@ -76,7 +108,12 @@ struct TaskDetailView: View {
                 }
                 Button("Cancel", role: .cancel) { }
             } message: {
-                Text("This action cannot be undone.")
+                let count = taskManager.subtasks(of: task).count
+                if count > 0 {
+                    Text("This will also delete \(count) subtask\(count == 1 ? "" : "s"). This action cannot be undone.")
+                } else {
+                    Text("This action cannot be undone.")
+                }
             }
         }
     }

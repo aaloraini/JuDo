@@ -20,9 +20,16 @@ struct ToggleTaskIntent: AppIntent {
             throw TaskIntentError.taskNotFound
         }
 
-        task.isCompleted.toggle()
-        task.updatedAt = Date()
-        task.completedAt = task.isCompleted ? Date() : nil
+        TaskCompletion.toggle(
+            task,
+            children: { parent in
+                (try? TaskIntentHelpers.findChildren(of: parent.id, in: context)) ?? []
+            },
+            parent: { child in
+                guard let parentId = child.parentId else { return nil }
+                return (try? TaskIntentHelpers.findTask(id: parentId, in: context)) ?? nil
+            }
+        )
         try context.save()
 
         TaskIntentHelpers.reloadWidget()

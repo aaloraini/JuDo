@@ -35,6 +35,23 @@ private enum TaskWidgetSorting {
     }
 }
 
+// MARK: - Hierarchy (widget shows top-level tasks only)
+
+private enum TaskWidgetHierarchy {
+    /// Same orphan-tolerant rule as TaskManager: a child whose parent record
+    /// hasn't synced yet shows as top-level until the parent arrives.
+    static func topLevel(_ tasks: [Task]) -> [Task] {
+        let ids = Set(tasks.map(\.id))
+        return tasks.filter { $0.parentId == nil || !ids.contains($0.parentId!) }
+    }
+
+    static func progressText(for task: Task, in tasks: [Task]) -> String? {
+        let children = tasks.filter { $0.parentId == task.id }
+        guard !children.isEmpty else { return nil }
+        return "\(children.filter(\.isCompleted).count)/\(children.count)"
+    }
+}
+
 // MARK: - Style constants
 
 private enum TahoeWidgetStyle {
@@ -230,22 +247,27 @@ struct JuDoMediumWidgetView: View {
     let tasks: [Task]
     @AppStorage("hideCompleted", store: UserDefaults(suiteName: "group.com.aloraini.JuDo")) private var hideCompleted: Bool = false
 
+    private var topLevelTasks: [Task] {
+        TaskWidgetHierarchy.topLevel(tasks)
+    }
     private var filteredTasks: [Task] {
-        (hideCompleted ? tasks.filter { !$0.isCompleted } : tasks).prefix(5).map { $0 }
+        (hideCompleted ? topLevelTasks.filter { !$0.isCompleted } : topLevelTasks).prefix(5).map { $0 }
     }
     private let addURL = URL(string: "judo://add")!
 
     var body: some View {
         GeometryReader { proxy in
             VStack(spacing: 8) {
-                TahoeWidgetHeader(title: "JuDo", subtitle: TaskWidgetSummary.subtitle(for: tasks), addURL: addURL)
+                TahoeWidgetHeader(title: "JuDo", subtitle: TaskWidgetSummary.subtitle(for: topLevelTasks), addURL: addURL)
                 TahoeDivider()
                 if filteredTasks.isEmpty {
-                    let copy = TaskWidgetEmptyStateCopy.text(tasks: tasks, hideCompleted: hideCompleted)
+                    let copy = TaskWidgetEmptyStateCopy.text(tasks: topLevelTasks, hideCompleted: hideCompleted)
                     TahoeEmptyState(title: copy.title, subtitle: copy.subtitle)
                 } else {
                     VStack(spacing: 4) {
-                        ForEach(filteredTasks) { TaskWidgetRow(task: $0) }
+                        ForEach(filteredTasks) { task in
+                            TaskWidgetRow(task: task, progress: TaskWidgetHierarchy.progressText(for: task, in: tasks))
+                        }
                     }
                     Spacer(minLength: 0)
                 }
@@ -265,22 +287,27 @@ struct JuDoLargeWidgetView: View {
     let tasks: [Task]
     @AppStorage("hideCompleted", store: UserDefaults(suiteName: "group.com.aloraini.JuDo")) private var hideCompleted: Bool = false
 
+    private var topLevelTasks: [Task] {
+        TaskWidgetHierarchy.topLevel(tasks)
+    }
     private var filteredTasks: [Task] {
-        (hideCompleted ? tasks.filter { !$0.isCompleted } : tasks).prefix(8).map { $0 }
+        (hideCompleted ? topLevelTasks.filter { !$0.isCompleted } : topLevelTasks).prefix(8).map { $0 }
     }
     private let addURL = URL(string: "judo://add")!
 
     var body: some View {
         GeometryReader { proxy in
             VStack(spacing: 8) {
-                TahoeWidgetHeader(title: "JuDo", subtitle: TaskWidgetSummary.subtitle(for: tasks), addURL: addURL)
+                TahoeWidgetHeader(title: "JuDo", subtitle: TaskWidgetSummary.subtitle(for: topLevelTasks), addURL: addURL)
                 TahoeDivider()
                 if filteredTasks.isEmpty {
-                    let copy = TaskWidgetEmptyStateCopy.text(tasks: tasks, hideCompleted: hideCompleted)
+                    let copy = TaskWidgetEmptyStateCopy.text(tasks: topLevelTasks, hideCompleted: hideCompleted)
                     TahoeEmptyState(title: copy.title, subtitle: copy.subtitle)
                 } else {
                     VStack(spacing: 4) {
-                        ForEach(filteredTasks) { TaskWidgetRowLarge(task: $0) }
+                        ForEach(filteredTasks) { task in
+                            TaskWidgetRowLarge(task: task, progress: TaskWidgetHierarchy.progressText(for: task, in: tasks))
+                        }
                     }
                     Spacer(minLength: 0)
                 }
@@ -298,6 +325,7 @@ struct JuDoLargeWidgetView: View {
 
 struct TaskWidgetRow: View {
     let task: Task
+    var progress: String? = nil
 
     private var priorityColor: Color? {
         switch task.priority {
@@ -325,6 +353,12 @@ struct TaskWidgetRow: View {
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
+            if let progress {
+                Text(progress)
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundColor(.secondary)
+            }
+
             if !task.isCompleted, let badge = TaskWidgetBadge.status(for: task) {
                 TaskStatusBadge(icon: badge.icon, text: badge.text, color: badge.color)
             }
@@ -336,6 +370,7 @@ struct TaskWidgetRow: View {
 
 struct TaskWidgetRowLarge: View {
     let task: Task
+    var progress: String? = nil
 
     private var priorityColor: Color? {
         switch task.priority {
@@ -371,6 +406,12 @@ struct TaskWidgetRowLarge: View {
                 .strikethrough(task.isCompleted)
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
+
+            if let progress {
+                Text(progress)
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundColor(.secondary)
+            }
 
             if !task.isCompleted, let badge = TaskWidgetBadge.status(for: task) {
                 TaskStatusBadge(icon: badge.icon, text: badge.text, color: badge.color)

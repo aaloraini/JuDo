@@ -83,12 +83,20 @@ class ErrorManager: ObservableObject {
 // MARK: - TaskManager safe wrappers
 
 extension TaskManager {
-    func safeAddTask(title: String, priority: Priority? = nil, dueDate: Date? = nil) {
+    func safeAddTask(title: String, priority: Priority? = nil, dueDate: Date? = nil, subtaskTitles: [String] = []) {
         guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             ErrorManager.shared.handle(JuDoError.taskCreationFailed("Task title is empty"))
             return
         }
-        addTask(title: title, priority: priority, dueDate: dueDate)
+        addTask(title: title, priority: priority, dueDate: dueDate, subtaskTitles: subtaskTitles)
+    }
+
+    func safeAddSubtask(to parent: Task, title: String) {
+        guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            ErrorManager.shared.handle(JuDoError.taskCreationFailed("Task title is empty"))
+            return
+        }
+        addSubtask(to: parent, title: title)
     }
 
     func safeDeleteTask(_ task: Task) {

@@ -12,6 +12,9 @@ struct ContentView: View {
     @State private var showingClearConfirmation = false
     @State private var showingSupport = false
     @State private var showingSync = false
+    @State private var editingTask: Task? = nil
+    @State private var expandedTasks: Set<UUID> = []
+    @State private var taskPendingDelete: Task? = nil
 
     init(container: ModelContainer) {
         _taskManager = StateObject(wrappedValue: TaskManager(container: container))
@@ -27,14 +30,17 @@ struct ContentView: View {
         .sheet(isPresented: $showingAddTask) {
             AddTaskSheet(
                 taskTitle: $newTaskTitle,
-                onAdd: { priority, dueDate in
-                    addTask(priority: priority, dueDate: dueDate)
+                onAdd: { priority, dueDate, subtaskTitles in
+                    addTask(priority: priority, dueDate: dueDate, subtaskTitles: subtaskTitles)
                 },
                 onCancel: {
                     newTaskTitle = ""
                     showingAddTask = false
                 }
             )
+        }
+        .sheet(item: $editingTask) { task in
+            EditTaskSheet(task: task, taskManager: taskManager)
         }
         .sheet(isPresented: $showingSupport) {
             SupportView()
@@ -64,25 +70,36 @@ struct ContentView: View {
                 taskManager.clearCompletedTasks()
             }
         } message: {
-            let count = taskManager.tasks.filter { $0.isCompleted }.count
-            Text("Delete \(count) completed task\(count == 1 ? "" : "s")? This cannot be undone.")
+            let completed = taskManager.completedTasks
+            let hasChildren = completed.contains { taskManager.hasSubtasks($0) }
+            Text("Delete \(completed.count) completed task\(completed.count == 1 ? "" : "s")\(hasChildren ? " and their subtasks" : "")? This cannot be undone.")
+        }
+        .alert(
+            "Delete Task",
+            isPresented: Binding(
+                get: { taskPendingDelete != nil },
+                set: { if !$0 { taskPendingDelete = nil } }
+            ),
+            presenting: taskPendingDelete
+        ) { task in
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                taskManager.safeDeleteTask(task)
+            }
+        } message: { task in
+            let count = taskManager.subtasks(of: task).count
+            Text("\"\(task.title)\" has \(count) subtask\(count == 1 ? "" : "s") that will also be deleted.")
         }
     }
 
     var searchedIncompleteTasks: [Task] {
         guard !searchQuery.isEmpty else { return taskManager.incompleteTasks }
-        return taskManager.incompleteTasks.filter { task in
-            task.title.localizedCaseInsensitiveContains(searchQuery) ||
-            (task.notes?.localizedCaseInsensitiveContains(searchQuery) ?? false)
-        }
+        return taskManager.incompleteTasks.filter { taskManager.matches($0, query: searchQuery) }
     }
 
     var searchedCompletedTasks: [Task] {
         guard !searchQuery.isEmpty else { return taskManager.completedTasks }
-        return taskManager.completedTasks.filter { task in
-            task.title.localizedCaseInsensitiveContains(searchQuery) ||
-            (task.notes?.localizedCaseInsensitiveContains(searchQuery) ?? false)
-        }
+        return taskManager.completedTasks.filter { taskManager.matches($0, query: searchQuery) }
     }
 
     private var toolbarContent: some View {
@@ -169,14 +186,14 @@ struct ContentView: View {
                 .buttonStyle(.bordered)
 
                 Button(action: {
-                    if taskManager.tasks.filter({ $0.isCompleted }).count > 0 {
+                    if !taskManager.completedTasks.isEmpty {
                         showingClearConfirmation = true
                     }
                 }) {
                     Image(systemName: "trash").help("Clear Completed Tasks")
                 }
                 .buttonStyle(.bordered)
-                .disabled(taskManager.tasks.filter { $0.isCompleted }.isEmpty)
+                .disabled(taskManager.completedTasks.isEmpty)
 
                 Button(action: { showingSync = true }) {
                     Image(systemName: SyncManager.shared.status.symbolName).help("iCloud Sync")
@@ -213,7 +230,7 @@ struct ContentView: View {
                 List {
                     if !incomplete.isEmpty {
                         ForEach(incomplete) { task in
-                            TaskRow(task: task, taskManager: taskManager)
+                            taskRowGroup(for: task)
                                 .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 16))
                         }
                         .onMove(perform: taskManager.sortOption == .manual && searchQuery.isEmpty
@@ -221,18 +238,18 @@ struct ContentView: View {
                             : nil
                         )
                         .onDelete { offsets in
-                            offsets.forEach { taskManager.safeDeleteTask(incomplete[$0]) }
+                            offsets.forEach { requestDelete(incomplete[$0]) }
                         }
                     }
 
                     if !taskManager.hideCompleted && !completed.isEmpty {
                         Section(header: Text("Completed").font(.caption).foregroundColor(.secondary)) {
                             ForEach(completed) { task in
-                                TaskRow(task: task, taskManager: taskManager)
+                                taskRowGroup(for: task)
                                     .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 16))
                             }
                             .onDelete { offsets in
-                                offsets.forEach { taskManager.safeDeleteTask(completed[$0]) }
+                                offsets.forEach { requestDelete(completed[$0]) }
                             }
                         }
                     }
@@ -240,6 +257,66 @@ struct ContentView: View {
             } else {
                 emptyStateContent
             }
+        }
+    }
+
+    @ViewBuilder
+    private func taskRowGroup(for task: Task) -> some View {
+        if taskManager.hasSubtasks(task) || expandedTasks.contains(task.id) {
+            DisclosureGroup(isExpanded: expansionBinding(for: task)) {
+                let children = taskManager.subtasks(of: task)
+                ForEach(children) { subtask in
+                    SubtaskRow(
+                        task: subtask,
+                        taskManager: taskManager,
+                        onEdit: { editingTask = subtask },
+                        onDelete: { requestDelete(subtask) }
+                    )
+                }
+                .onMove { source, destination in
+                    taskManager.moveSubtask(of: task, from: source, to: destination)
+                }
+                .onDelete { offsets in
+                    offsets.forEach { requestDelete(children[$0]) }
+                }
+                AddSubtaskRow { title in
+                    taskManager.safeAddSubtask(to: task, title: title)
+                }
+            } label: {
+                taskRowLabel(for: task)
+            }
+        } else {
+            taskRowLabel(for: task)
+        }
+    }
+
+    private func taskRowLabel(for task: Task) -> some View {
+        TaskRow(
+            task: task,
+            taskManager: taskManager,
+            onEdit: { editingTask = task },
+            onDelete: { requestDelete(task) }
+        )
+    }
+
+    private func expansionBinding(for task: Task) -> Binding<Bool> {
+        Binding(
+            get: { expandedTasks.contains(task.id) },
+            set: { isExpanded in
+                if isExpanded {
+                    expandedTasks.insert(task.id)
+                } else {
+                    expandedTasks.remove(task.id)
+                }
+            }
+        )
+    }
+
+    private func requestDelete(_ task: Task) {
+        if taskManager.hasSubtasks(task) {
+            taskPendingDelete = task
+        } else {
+            taskManager.safeDeleteTask(task)
         }
     }
 
@@ -293,13 +370,13 @@ struct ContentView: View {
         taskManager.moveTask(from: source, to: destination)
     }
 
-    private func addTask(priority: Priority?, dueDate: Date?) {
+    private func addTask(priority: Priority?, dueDate: Date?, subtaskTitles: [String]) {
         let trimmed = newTaskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             ErrorManager.shared.handle(JuDoError.taskCreationFailed("Task title cannot be empty"))
             return
         }
-        taskManager.safeAddTask(title: trimmed, priority: priority, dueDate: dueDate)
+        taskManager.safeAddTask(title: trimmed, priority: priority, dueDate: dueDate, subtaskTitles: subtaskTitles)
         newTaskTitle = ""
         showingAddTask = false
     }
@@ -310,6 +387,8 @@ struct ContentView: View {
 struct TaskRow: View {
     let task: Task
     let taskManager: TaskManager
+    var onEdit: (() -> Void)? = nil
+    var onDelete: (() -> Void)? = nil
 
     var priorityColor: Color? {
         switch task.priority {
@@ -367,6 +446,17 @@ struct TaskRow: View {
                 .foregroundColor(task.isCompleted ? .secondary : .primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
+            if let progress = taskManager.subtaskProgress(of: task) {
+                HStack(spacing: 4) {
+                    Image(systemName: "checklist").font(.system(size: 11))
+                    Text("\(progress.done)/\(progress.total)").font(.system(size: 11))
+                }
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(RoundedRectangle(cornerRadius: 4).fill(Color.secondary.opacity(0.1)))
+            }
+
             if let dateText = dueDateText, !task.isOverdue && !task.isDueToday {
                 Text(dateText)
                     .font(.system(size: 12))
@@ -395,7 +485,87 @@ struct TaskRow: View {
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
         .contentShape(Rectangle())
+        .onTapGesture { onEdit?() }
+        .contextMenu {
+            Button { onEdit?() } label: {
+                Label("Edit", systemImage: "pencil")
+            }
+            Divider()
+            Button(role: .destructive) { onDelete?() } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
         .background(RoundedRectangle(cornerRadius: 6).fill(Color(NSColor.controlBackgroundColor).opacity(0.5)))
+    }
+}
+
+// MARK: - SubtaskRow
+
+struct SubtaskRow: View {
+    let task: Task
+    let taskManager: TaskManager
+    var onEdit: (() -> Void)? = nil
+    var onDelete: (() -> Void)? = nil
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Button(action: { taskManager.safeToggleTaskCompletion(task) }) {
+                Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(task.isCompleted ? .accentColor : .secondary)
+                    .font(.system(size: 15))
+                    .symbolRenderingMode(.hierarchical)
+            }
+            .buttonStyle(PlainButtonStyle())
+            .frame(width: 18, height: 18)
+
+            Text(task.title)
+                .font(.system(size: 13))
+                .strikethrough(task.isCompleted)
+                .foregroundColor(task.isCompleted ? .secondary : .primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.vertical, 5)
+        .padding(.horizontal, 12)
+        .contentShape(Rectangle())
+        .onTapGesture { onEdit?() }
+        .contextMenu {
+            Button { onEdit?() } label: {
+                Label("Edit", systemImage: "pencil")
+            }
+            Divider()
+            Button(role: .destructive) { onDelete?() } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+        .background(RoundedRectangle(cornerRadius: 6).fill(Color(NSColor.controlBackgroundColor).opacity(0.3)))
+    }
+}
+
+// MARK: - AddSubtaskRow
+
+struct AddSubtaskRow: View {
+    @State private var title = ""
+    let onSubmit: (String) -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "plus")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.secondary)
+                .frame(width: 18)
+
+            TextField("Add subtask...", text: $title)
+                .textFieldStyle(.plain)
+                .font(.system(size: 13))
+                .onSubmit {
+                    let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !trimmed.isEmpty else { return }
+                    onSubmit(trimmed)
+                    title = ""
+                }
+        }
+        .padding(.vertical, 5)
+        .padding(.horizontal, 12)
     }
 }
 
@@ -406,10 +576,19 @@ struct AddTaskSheet: View {
     @State private var selectedPriority: Priority? = nil
     @State private var hasDueDate: Bool = false
     @State private var dueDate: Date = Date()
+    @State private var isParentTask: Bool = false
+    @State private var subtaskTitles: [String] = []
+    @State private var newSubtaskTitle: String = ""
     @FocusState private var titleFieldFocused: Bool
 
-    let onAdd: (Priority?, Date?) -> Void
+    let onAdd: (Priority?, Date?, [String]) -> Void
     let onCancel: () -> Void
+
+    private var pendingSubtaskTitles: [String] {
+        guard isParentTask else { return [] }
+        let pending = newSubtaskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        return pending.isEmpty ? subtaskTitles : subtaskTitles + [pending]
+    }
 
     var body: some View {
         VStack(spacing: 20) {
@@ -421,7 +600,7 @@ struct AddTaskSheet: View {
                 .focused($titleFieldFocused)
                 .onSubmit {
                     if !taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        onAdd(selectedPriority, hasDueDate ? dueDate : nil)
+                        onAdd(selectedPriority, hasDueDate ? dueDate : nil, pendingSubtaskTitles)
                     }
                 }
                 .onAppear { titleFieldFocused = true }
@@ -446,10 +625,43 @@ struct AddTaskSheet: View {
                 }
             }
 
+            VStack(alignment: .leading, spacing: 8) {
+                Toggle("Parent Task with Subtasks", isOn: $isParentTask).font(.system(size: 13))
+                if isParentTask {
+                    ForEach(subtaskTitles.indices, id: \.self) { index in
+                        HStack(spacing: 8) {
+                            Image(systemName: "circle")
+                                .font(.system(size: 8))
+                                .foregroundColor(.secondary)
+                            Text(subtaskTitles[index]).font(.system(size: 13))
+                            Spacer()
+                            Button(action: { subtaskTitles.remove(at: index) }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding(.leading, 4)
+                    }
+
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.secondary)
+                        TextField("Add subtask...", text: $newSubtaskTitle)
+                            .textFieldStyle(.plain)
+                            .font(.system(size: 13))
+                            .onSubmit { commitSubtask() }
+                    }
+                    .padding(.leading, 4)
+                }
+            }
+
             HStack {
                 Spacer()
                 Button("Cancel") { onCancel() }.keyboardShortcut(.escape)
-                Button("Add") { onAdd(selectedPriority, hasDueDate ? dueDate : nil) }
+                Button("Add") { onAdd(selectedPriority, hasDueDate ? dueDate : nil, pendingSubtaskTitles) }
                     .keyboardShortcut(.return)
                     .disabled(taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .buttonStyle(.borderedProminent)
@@ -458,6 +670,181 @@ struct AddTaskSheet: View {
         .padding(24)
         .frame(width: 450)
         .background(Color(NSColor.windowBackgroundColor))
+    }
+
+    private func commitSubtask() {
+        let trimmed = newSubtaskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        subtaskTitles.append(trimmed)
+        newSubtaskTitle = ""
+    }
+}
+
+// MARK: - EditTaskSheet
+
+struct EditTaskSheet: View {
+    let task: Task
+    let taskManager: TaskManager
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var title: String
+    @State private var selectedPriority: Priority?
+    @State private var hasDueDate: Bool
+    @State private var dueDate: Date
+    @State private var isParentTask: Bool
+    @State private var existingSubtasks: [Task]
+    @State private var removedSubtaskIds: Set<UUID> = []
+    @State private var newSubtaskTitles: [String] = []
+    @State private var newSubtaskTitle: String = ""
+    @FocusState private var titleFieldFocused: Bool
+
+    init(task: Task, taskManager: TaskManager) {
+        self.task = task
+        self.taskManager = taskManager
+        _title            = State(initialValue: task.title)
+        _selectedPriority = State(initialValue: task.priority)
+        _hasDueDate       = State(initialValue: task.dueDate != nil)
+        _dueDate          = State(initialValue: task.dueDate ?? Date())
+        let children = taskManager.subtasks(of: task)
+        _existingSubtasks = State(initialValue: children)
+        _isParentTask     = State(initialValue: !children.isEmpty)
+    }
+
+    private var pendingSubtaskTitles: [String] {
+        guard isParentTask else { return [] }
+        let pending = newSubtaskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        return pending.isEmpty ? newSubtaskTitles : newSubtaskTitles + [pending]
+    }
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Edit Task").font(.title2).fontWeight(.medium)
+
+            TextField("Task title...", text: $title)
+                .textFieldStyle(.roundedBorder)
+                .font(.system(size: 15))
+                .focused($titleFieldFocused)
+                .onSubmit { saveChanges() }
+                .onAppear { titleFieldFocused = true }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Priority").font(.system(size: 13)).foregroundColor(.secondary)
+                Picker("Priority", selection: $selectedPriority) {
+                    Text("None").tag(Priority?.none)
+                    Text("🔴 High").tag(Priority?.some(.high))
+                    Text("🟠 Medium").tag(Priority?.some(.medium))
+                    Text("⚪️ Low").tag(Priority?.some(.low))
+                }
+                .pickerStyle(.segmented)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Toggle("Set Due Date", isOn: $hasDueDate).font(.system(size: 13))
+                if hasDueDate {
+                    DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
+                        .datePickerStyle(.compact)
+                        .labelsHidden()
+                }
+            }
+
+            if task.parentId == nil {
+                VStack(alignment: .leading, spacing: 8) {
+                    if existingSubtasks.isEmpty && newSubtaskTitles.isEmpty {
+                        Toggle("Parent Task with Subtasks", isOn: $isParentTask).font(.system(size: 13))
+                    } else {
+                        Text("Subtasks").font(.system(size: 13)).foregroundColor(.secondary)
+                    }
+
+                    if isParentTask {
+                        ForEach(existingSubtasks.filter { !removedSubtaskIds.contains($0.id) }) { subtask in
+                            HStack(spacing: 8) {
+                                Image(systemName: subtask.isCompleted ? "checkmark.circle.fill" : "circle")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(subtask.isCompleted ? .accentColor : .secondary)
+                                Text(subtask.title)
+                                    .font(.system(size: 13))
+                                    .strikethrough(subtask.isCompleted)
+                                    .foregroundColor(subtask.isCompleted ? .secondary : .primary)
+                                Spacer()
+                                Button(action: { removedSubtaskIds.insert(subtask.id) }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            .padding(.leading, 4)
+                        }
+
+                        ForEach(newSubtaskTitles.indices, id: \.self) { index in
+                            HStack(spacing: 8) {
+                                Image(systemName: "circle")
+                                    .font(.system(size: 8))
+                                    .foregroundColor(.secondary)
+                                Text(newSubtaskTitles[index]).font(.system(size: 13))
+                                Spacer()
+                                Button(action: { newSubtaskTitles.remove(at: index) }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            .padding(.leading, 4)
+                        }
+
+                        HStack(spacing: 8) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(.secondary)
+                            TextField("Add subtask...", text: $newSubtaskTitle)
+                                .textFieldStyle(.plain)
+                                .font(.system(size: 13))
+                                .onSubmit { commitSubtask() }
+                        }
+                        .padding(.leading, 4)
+                    }
+                }
+            }
+
+            HStack {
+                Spacer()
+                Button("Cancel") { dismiss() }.keyboardShortcut(.escape)
+                Button("Save") { saveChanges() }
+                    .keyboardShortcut(.return)
+                    .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .buttonStyle(.borderedProminent)
+            }
+        }
+        .padding(24)
+        .frame(width: 450)
+        .background(Color(NSColor.windowBackgroundColor))
+    }
+
+    private func commitSubtask() {
+        let trimmed = newSubtaskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        newSubtaskTitles.append(trimmed)
+        newSubtaskTitle = ""
+    }
+
+    private func saveChanges() {
+        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        task.title     = trimmed
+        task.priority  = selectedPriority
+        task.dueDate   = hasDueDate ? dueDate : nil
+        task.updatedAt = Date()
+        for id in removedSubtaskIds {
+            if let subtask = existingSubtasks.first(where: { $0.id == id }) {
+                taskManager.deleteTask(subtask)
+            }
+        }
+        for subtaskTitle in pendingSubtaskTitles {
+            taskManager.addSubtask(to: task, title: subtaskTitle)
+        }
+        taskManager.saveTasks()
+        dismiss()
     }
 }
 

@@ -52,27 +52,50 @@ class TaskManager: ObservableObject {
         WidgetCenter.shared.reloadTimelines(ofKind: "JuDoWidget")
     }
 
-    func addTask(title: String, priority: Priority? = nil, dueDate: Date? = nil) {
-        let newTask = Task(title: title, order: tasks.count, priority: priority, dueDate: dueDate)
+    func addTask(title: String, priority: Priority? = nil, dueDate: Date? = nil, subtaskTitles: [String] = []) {
+        let newTask = Task(title: title, order: topLevelTasks.count, priority: priority, dueDate: dueDate)
         modelContext.insert(newTask)
+        var order = 0
+        for subtitle in subtaskTitles {
+            let trimmed = subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { continue }
+            modelContext.insert(Task(title: trimmed, order: order, parentId: newTask.id))
+            order += 1
+        }
+        save()
+    }
+
+    func addSubtask(to parent: Task, title: String) {
+        let subtask = Task(title: title, order: subtasks(of: parent).count, parentId: parent.id)
+        modelContext.insert(subtask)
+        // The list grew, so a completed master goes back to incomplete
+        if parent.isCompleted {
+            TaskCompletion.setCompleted(parent, false)
+        }
         save()
     }
 
     func deleteTask(_ task: Task) {
+        for child in tasks where child.parentId == task.id {
+            modelContext.delete(child)
+        }
+        let scope = task.parentId
         let deletedOrder = task.order
         modelContext.delete(task)
         save()
-        // Only shift tasks that were after the deleted one
-        for t in tasks where t.order > deletedOrder {
+        // Only shift siblings that were after the deleted one
+        for t in tasks where t.parentId == scope && t.order > deletedOrder {
             t.order -= 1
         }
         save()
     }
 
     func toggleTaskCompletion(_ task: Task) {
-        task.isCompleted.toggle()
-        task.updatedAt = Date()
-        task.completedAt = task.isCompleted ? Date() : nil
+        TaskCompletion.toggle(
+            task,
+            children: { parent in self.subtasks(of: parent) },
+            parent: { child in child.parentId.flatMap { pid in self.tasks.first { $0.id == pid } } }
+        )
         save()
     }
 
@@ -94,11 +117,40 @@ class TaskManager: ObservableObject {
         }
 
         if oldOrder < newOrder {
-            for t in tasks where t.order > oldOrder && t.order <= newOrder {
+            for t in tasks where t.parentId == nil && t.order > oldOrder && t.order <= newOrder {
                 t.order -= 1
             }
         } else if oldOrder > newOrder {
-            for t in tasks where t.order >= newOrder && t.order < oldOrder {
+            for t in tasks where t.parentId == nil && t.order >= newOrder && t.order < oldOrder {
+                t.order += 1
+            }
+        }
+        taskToMove.order = newOrder
+        taskToMove.updatedAt = Date()
+        save()
+    }
+
+    func moveSubtask(of parent: Task, from source: IndexSet, to destination: Int) {
+        let siblings = subtasks(of: parent)
+        guard let sourceIdx = source.first, sourceIdx < siblings.count else { return }
+        let taskToMove = siblings[sourceIdx]
+        let oldOrder = taskToMove.order
+
+        let newOrder: Int
+        if destination <= 0 {
+            newOrder = (siblings.first?.order ?? 0) - 1
+        } else if destination >= siblings.count {
+            newOrder = (siblings.last?.order ?? 0) + 1
+        } else {
+            newOrder = siblings[destination].order
+        }
+
+        if oldOrder < newOrder {
+            for t in tasks where t.parentId == parent.id && t.order > oldOrder && t.order <= newOrder {
+                t.order -= 1
+            }
+        } else if oldOrder > newOrder {
+            for t in tasks where t.parentId == parent.id && t.order >= newOrder && t.order < oldOrder {
                 t.order += 1
             }
         }
@@ -108,11 +160,18 @@ class TaskManager: ObservableObject {
     }
 
     func clearCompletedTasks() {
-        let completed = tasks.filter { $0.isCompleted }
-        completed.forEach { modelContext.delete($0) }
+        // Completed subtasks of an incomplete master are kept; they stay
+        // visible under their master and feed its progress count.
+        let completedTopLevel = topLevelTasks.filter { $0.isCompleted }
+        for task in completedTopLevel {
+            for child in tasks where child.parentId == task.id {
+                modelContext.delete(child)
+            }
+            modelContext.delete(task)
+        }
         save()
-        // Compact remaining order values
-        let sorted = tasks.sorted { $0.order < $1.order }
+        // Compact remaining top-level order values
+        let sorted = topLevelTasks.sorted { $0.order < $1.order }
         for (index, task) in sorted.enumerated() where task.order != index {
             task.order = index
         }
@@ -124,18 +183,50 @@ class TaskManager: ObservableObject {
         save()
     }
 
+    // MARK: - Subtasks
+
+    /// Tasks shown at the root of the list. Orphan-tolerant: a child whose
+    /// parent hasn't synced yet (CloudKit delivers records in arbitrary order)
+    /// shows as top-level and self-heals when the parent record arrives.
+    private var topLevelTasks: [Task] {
+        let ids = Set(tasks.map(\.id))
+        return tasks.filter { $0.parentId == nil || !ids.contains($0.parentId!) }
+    }
+
+    func subtasks(of parent: Task) -> [Task] {
+        tasks.filter { $0.parentId == parent.id }.sorted { $0.order < $1.order }
+    }
+
+    func hasSubtasks(_ task: Task) -> Bool {
+        tasks.contains { $0.parentId == task.id }
+    }
+
+    func subtaskProgress(of task: Task) -> (done: Int, total: Int)? {
+        let children = subtasks(of: task)
+        guard !children.isEmpty else { return nil }
+        return (children.filter(\.isCompleted).count, children.count)
+    }
+
+    /// Search match: a task matches if its own title/notes match or any subtask's title does.
+    func matches(_ task: Task, query: String) -> Bool {
+        guard !query.isEmpty else { return true }
+        if task.title.localizedCaseInsensitiveContains(query) { return true }
+        if task.notes?.localizedCaseInsensitiveContains(query) ?? false { return true }
+        return subtasks(of: task).contains { $0.title.localizedCaseInsensitiveContains(query) }
+    }
+
     // MARK: - Computed views
 
     var incompleteTasks: [Task] {
-        sortTasks(tasks.filter { !$0.isCompleted })
+        sortTasks(topLevelTasks.filter { !$0.isCompleted })
     }
 
     var completedTasks: [Task] {
-        sortTasks(tasks.filter { $0.isCompleted })
+        sortTasks(topLevelTasks.filter { $0.isCompleted })
     }
 
     var filteredTasks: [Task] {
-        sortTasks(hideCompleted ? tasks.filter { !$0.isCompleted } : tasks)
+        sortTasks(hideCompleted ? topLevelTasks.filter { !$0.isCompleted } : topLevelTasks)
     }
 
     private func sortTasks(_ input: [Task]) -> [Task] {

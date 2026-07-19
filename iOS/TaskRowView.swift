@@ -60,6 +60,12 @@ struct TaskRowView: View {
             }
 
             Spacer()
+
+            if let progress = taskManager.subtaskProgress(of: task) {
+                Text("\(progress.done)/\(progress.total)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding(.vertical, 2)
     }
